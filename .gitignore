@@ -1,0 +1,13 @@
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+/.idea/misc.xml
+/.idea/modules.xml
+/onesignal/build/
+/*/.idea/workspace.xml
+/app/src/main/res/values/environments.xml
