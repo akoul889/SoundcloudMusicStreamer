@@ -10,4 +10,5 @@
 /.idea/modules.xml
 /onesignal/build/
 /*/.idea/workspace.xml
+.idea
 /app/src/main/res/values/environments.xml
