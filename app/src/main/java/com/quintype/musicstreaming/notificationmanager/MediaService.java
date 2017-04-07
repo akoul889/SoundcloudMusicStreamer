@@ -32,6 +32,8 @@ import com.quintype.musicstreaming.utils.StorageUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 /**
  * Created by akshaykoul on 06/04/17.
  */
@@ -81,11 +83,13 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public IBinder onBind(Intent intent) {
+        Timber.d("onBind");
         return iBinder;
     }
 
     @Override
     public void onCreate() {
+        Timber.d("onCreate");
         super.onCreate();
         // Perform one-time setup procedures
 
@@ -101,12 +105,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        Timber.d("onBufferingUpdate");
         //Invoked indicating buffering status of
         //a media resource being streamed over the network.
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        Timber.d("onCompletion");
         //Invoked when playback of a media source has completed.
         stopMedia();
         //stop the service
@@ -117,6 +123,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     //Handle errors
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        Timber.d("onError");
         //Invoked when there has been an error during an asynchronous operation
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
@@ -135,23 +142,27 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        Timber.d("onInfo");
         //Invoked to communicate some info.
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        Timber.d("onPrepared");
         //Invoked when the media source is ready for playback.
         playMedia();
     }
 
     @Override
     public void onSeekComplete(MediaPlayer mp) {
+        Timber.d("onSeekComplete");
         //Invoked indicating the completion of a seek operation.
     }
 
     @Override
     public void onAudioFocusChange(int focusChange) {
+        Timber.d("onAudioFocusChange");
         //Invoked when the audio focus of the system is updated.
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
@@ -189,6 +200,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
 
     private void initMediaPlayer() {
+        Timber.d("initMediaPlayer");
         mediaPlayer = new MediaPlayer();
         //Set up MediaPlayer event listeners
         mediaPlayer.setOnCompletionListener(this);
@@ -212,6 +224,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void playMedia() {
+        Timber.d("playMedia");
         if (!mediaPlayer.isPlaying()) {
 //            mDelayedStopHandler.removeCallbacksAndMessages(null);
             mediaPlayer.start();
@@ -219,6 +232,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void stopMedia() {
+        Timber.d("stopMedia");
         if (mediaPlayer == null) return;
         if (mediaPlayer.isPlaying()) {
 //            mDelayedStopHandler.removeCallbacksAndMessages(null);
@@ -228,6 +242,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void pauseMedia() {
+        Timber.d("pauseMedia");
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
 //            mDelayedStopHandler.removeCallbacksAndMessages(null);
@@ -237,6 +252,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void resumeMedia() {
+        Timber.d("resumeMedia");
         if (!mediaPlayer.isPlaying()) {
 //            mDelayedStopHandler.removeCallbacksAndMessages(null);
             mediaPlayer.seekTo(resumePosition);
@@ -246,6 +262,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
 
     private boolean requestAudioFocus() {
+        Timber.d("requestAudioFocus");
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager
                 .AUDIOFOCUS_GAIN);
@@ -258,12 +275,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private boolean removeAudioFocus() {
+        Timber.d("removeAudioFocus");
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
                 audioManager.abandonAudioFocus(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Timber.d("onStartCommand");
         try {
             //Load data from SharedPreferences
             StorageUtil storage = new StorageUtil(getApplicationContext());
@@ -305,6 +324,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onDestroy() {
+        Timber.d("onDestroy");
         super.onDestroy();
         if (mediaPlayer != null) {
             stopMedia();
@@ -332,6 +352,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     private BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Timber.d("onReceive becomingNoisyReceiver");
             //pause audio on ACTION_AUDIO_BECOMING_NOISY
             pauseMedia();
             buildNotification(PlaybackStatus.PAUSED);
@@ -339,6 +360,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     };
 
     private void registerBecomingNoisyReceiver() {
+        Timber.d("registerBecomingNoisyReceiver");
         //register after getting audio focus
         IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
         registerReceiver(becomingNoisyReceiver, intentFilter);
@@ -346,12 +368,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
     //Handle incoming phone calls
     private void callStateListener() {
+        Timber.d("callStateListener");
         // Get the telephony manager
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         //Starting listening for PhoneState changes
         phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
+                Timber.d("onCallStateChanged");
                 switch (state) {
                     //if at least one call exists or the phone is ringing
                     //pause the MediaPlayer
@@ -383,6 +407,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     private BroadcastReceiver playNewAudio = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Timber.d("onReceive playNewAudio");
 
             //Get the new media index form SharedPreferences
             audioIndex = new StorageUtil(getApplicationContext()).loadAudioIndex();
@@ -404,12 +429,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     };
 
     private void registerPlayNewAudio() {
+        Timber.d("registerPlayNewAudio");
         //Register playNewMedia receiver
         IntentFilter filter = new IntentFilter(Constants.Broadcast_PLAY_NEW_AUDIO);
         registerReceiver(playNewAudio, filter);
     }
 
     private void initMediaSession() throws RemoteException {
+        Timber.d("initMediaSession");
         if (mediaSessionManager != null) return; //mediaSessionManager exists
 
         mediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -431,6 +458,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
             // Implement callbacks
             @Override
             public void onPlay() {
+                Timber.d("onPlay");
                 super.onPlay();
                 resumeMedia();
                 buildNotification(PlaybackStatus.PLAYING);
@@ -438,6 +466,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
             @Override
             public void onPause() {
+                Timber.d("onPause");
                 super.onPause();
                 pauseMedia();
                 buildNotification(PlaybackStatus.PAUSED);
@@ -445,6 +474,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
             @Override
             public void onSkipToNext() {
+                Timber.d("onSkipToNext");
                 super.onSkipToNext();
                 skipToNext();
                 updateMetaData();
@@ -453,6 +483,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
             @Override
             public void onSkipToPrevious() {
+                Timber.d("onSkipToPrevious");
                 super.onSkipToPrevious();
                 skipToPrevious();
                 updateMetaData();
@@ -461,6 +492,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
             @Override
             public void onStop() {
+                Timber.d("onStop");
                 super.onStop();
 
                 //TODO check when this get triggered
@@ -474,12 +506,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
             @Override
             public void onSeekTo(long position) {
+                Timber.d("onSeekTo");
                 super.onSeekTo(position);
             }
         });
     }
 
     private void updateMetaData() {
+        Timber.d("updateMetaData");
         Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
                 R.mipmap.ic_launcher_round); //replace with medias albumArt
         // Update the current metadata
@@ -492,7 +526,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void skipToNext() {
-
+        Timber.d("skipToNext");
         if (audioIndex == audioList.size() - 1) {
             //if last in playlist
             audioIndex = 0;
@@ -512,7 +546,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void skipToPrevious() {
-
+        Timber.d("skipToPrevious");
         if (audioIndex == 0) {
             //if first in playlist
             //set index to the last of audioList
@@ -533,6 +567,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void buildNotification(PlaybackStatus playbackStatus) {
+        Timber.d("buildNotification");
 
         int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
@@ -580,6 +615,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void removeNotification() {
+        Timber.d("removeNotification");
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context
                 .NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_ID);
@@ -587,6 +623,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
 
 
     private PendingIntent playbackAction(int actionNumber) {
+        Timber.d("playbackAction");
         Intent playbackAction = new Intent(this, MediaService.class);
         switch (actionNumber) {
             case 0:
@@ -612,6 +649,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     private void handleIncomingActions(Intent playbackAction) {
+        Timber.d("handleIncomingActions");
         if (playbackAction == null || playbackAction.getAction() == null) return;
 
         String actionString = playbackAction.getAction();

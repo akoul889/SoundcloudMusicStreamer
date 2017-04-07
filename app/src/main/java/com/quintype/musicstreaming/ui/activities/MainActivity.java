@@ -230,7 +230,7 @@ public class MainActivity extends BaseFragmentActivity {
         if (serviceBound) {
             unbindService(serviceConnection);
             //service is active
-            player.stopSelf();
+//            player.stopSelf();
         }
     }
 }
