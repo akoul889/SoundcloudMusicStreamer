@@ -4,23 +4,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.util.Pair;
+import android.view.View;
 import android.widget.Toast;
 
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.models.Track;
-import com.quintype.musicstreaming.notificationmanager.MediaService;
-import com.quintype.musicstreaming.ui.fragments.PlaybackControlsFragment;
+import com.quintype.musicstreaming.audiomanager.MediaService;
+import com.quintype.musicstreaming.ui.fragments.QuickControlsFragment;
 import com.quintype.musicstreaming.ui.fragments.SoundcloudListFragment;
+import com.quintype.musicstreaming.ui.slidinguppanel.SlidingUpPanelLayout;
 import com.quintype.musicstreaming.utils.Constants;
-import com.quintype.musicstreaming.utils.NetworkHelper;
 import com.quintype.musicstreaming.utils.StorageUtil;
 
 import java.util.ArrayList;
@@ -35,15 +38,20 @@ public class MainActivity extends BaseFragmentActivity {
     private MediaService player;
     boolean serviceBound = false;
     ArrayList<Audio> playList = new ArrayList<>();
+    SlidingUpPanelLayout slidingUpPanelLayout;
 
-    private PlaybackControlsFragment mControlsFragment;
+//    private PlaybackControlsFragment mControlsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_main);
+        slidingUpPanelLayout = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
+
+        setPanelSlideListeners(slidingUpPanelLayout);
         addFragment(SoundcloudListFragment.create(), null);
+        new initQuickControls().execute("");
     }
 
     @Override
@@ -99,11 +107,11 @@ public class MainActivity extends BaseFragmentActivity {
         super.onStart();
         Timber.d("Activity onStart");
 
-        mControlsFragment = (PlaybackControlsFragment) getFragmentManager()
-                .findFragmentById(R.id.fragment_playback_controls);
-        if (mControlsFragment == null) {
-            throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
-        }
+//        mControlsFragment = (PlaybackControlsFragment) getFragmentManager()
+//                .findFragmentById(R.id.fragment_playback_controls);
+//        if (mControlsFragment == null) {
+//            throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
+//        }
 
         hidePlaybackControls();
 
@@ -111,21 +119,21 @@ public class MainActivity extends BaseFragmentActivity {
 
     protected void showPlaybackControls() {
         Timber.d("showPlaybackControls");
-        if (NetworkHelper.isOnline(this)) {
-            getFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
-                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
-                    .show(mControlsFragment)
-                    .commit();
-        }
+//        if (NetworkHelper.isOnline(this)) {
+//            getFragmentManager().beginTransaction()
+//                    .setCustomAnimations(
+//                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
+//                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
+//                    .show(mControlsFragment)
+//                    .commit();
+//        }
     }
 
     protected void hidePlaybackControls() {
         Timber.d("hidePlaybackControls");
-        getFragmentManager().beginTransaction()
-                .hide(mControlsFragment)
-                .commit();
+//        getFragmentManager().beginTransaction()
+//                .hide(mControlsFragment)
+//                .commit();
     }
 
     protected boolean shouldShowControls() {
@@ -230,7 +238,67 @@ public class MainActivity extends BaseFragmentActivity {
         if (serviceBound) {
             unbindService(serviceConnection);
             //service is active
-//            player.stopSelf();
+            player.stopSelf();
         }
+    }
+
+    public class initQuickControls extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            QuickControlsFragment fragment1 = new QuickControlsFragment();
+            FragmentManager fragmentManager1 = getSupportFragmentManager();
+            fragmentManager1.beginTransaction()
+                    .replace(R.id.quickcontrols_container, fragment1).commitAllowingStateLoss();
+            return "Executed";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+//            QuickControlsFragment.topContainer.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    NavigationUtils.navigateToNowplaying(BaseActivity.this, false);
+//                }
+//            });
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
+    }
+
+
+    public void setPanelSlideListeners(SlidingUpPanelLayout panelLayout) {
+        panelLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                View nowPlayingCard = QuickControlsFragment.topContainer;
+                nowPlayingCard.setAlpha(1 - slideOffset);
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+                View nowPlayingCard = QuickControlsFragment.topContainer;
+                nowPlayingCard.setAlpha(1);
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                View nowPlayingCard = QuickControlsFragment.topContainer;
+                nowPlayingCard.setAlpha(0);
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+
+            }
+
+            @Override
+            public void onPanelHidden(View panel) {
+
+            }
+        });
     }
 }
