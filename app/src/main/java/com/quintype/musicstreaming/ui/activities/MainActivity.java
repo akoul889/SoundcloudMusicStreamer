@@ -29,7 +29,7 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class MainActivity extends BaseFragmentActivity {
+public class MainActivity extends PlayerActivity {
 
 
     private MediaService player;
@@ -39,7 +39,7 @@ public class MainActivity extends BaseFragmentActivity {
     private PlaybackControlsFragment mControlsFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_main);
@@ -85,7 +85,8 @@ public class MainActivity extends BaseFragmentActivity {
     private Collection<Audio> getAudioFromTracks(ArrayList<Track> trackList) {
         List<Audio> adioList = new ArrayList<>();
         for (Track track : trackList) {
-            Audio audio = new Audio(track.getDescription(), track.getTitle(), track.getGenre(),
+            Audio audio = new Audio(track.getId(), track.getDescription(), track.getTitle(), track
+                    .getGenre(),
                     track.getUser().getUsername(), track.getArtworkUrl(), track.getStreamUrl() +
                     "?client_id=" + getString(R.string.soundcloud_client_id));
             adioList.add(audio);
@@ -230,7 +231,7 @@ public class MainActivity extends BaseFragmentActivity {
         if (serviceBound) {
             unbindService(serviceConnection);
             //service is active
-//            player.stopSelf();
+            player.stopSelf();
         }
     }
 }

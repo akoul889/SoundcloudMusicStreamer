@@ -28,6 +28,10 @@
             </intent-filter>
         </activity>
         <service android:name=".notificationmanager.MediaService" />
+
+        <service
+            android:name=".notificationmanager.StreamService"
+            android:enabled="true" />
     </application>
 
 </manifest>
