@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.models.Track;
-import com.quintype.musicstreaming.audiomanager.MediaService;
+import com.quintype.musicstreaming.notificationmanager.MediaService;
 import com.quintype.musicstreaming.ui.fragments.QuickControlsFragment;
 import com.quintype.musicstreaming.ui.fragments.SoundcloudListFragment;
 import com.quintype.musicstreaming.ui.slidinguppanel.SlidingUpPanelLayout;
