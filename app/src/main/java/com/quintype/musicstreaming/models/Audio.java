@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Audio implements Serializable {
 
+
+    private int id;
     private String data;
     private String title;
     private String genre;
@@ -11,8 +13,10 @@ public class Audio implements Serializable {
     private String artwork;
     private String streamUrl;
 
-    public Audio(String data, String title, String genre, String artist, String artwork, String
+    public Audio(int id, String data, String title, String genre, String artist, String
+            artwork, String
             streamUrl) {
+        this.id = id;
         this.data = data;
         this.title = title;
         this.genre = genre;
@@ -67,5 +71,13 @@ public class Audio implements Serializable {
 
     public void setStreamUrl(String streamUrl) {
         this.streamUrl = streamUrl;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
