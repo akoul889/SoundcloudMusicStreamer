@@ -42,6 +42,7 @@
             android:layout_marginRight="42dp"
             android:ellipsize="end"
             android:maxLines="1"
+            android:gravity="center"
             android:text="Demons"
             android:textSize="15sp" />
 
@@ -71,6 +72,13 @@
             android:layout_width="23dp"
             android:layout_height="23dp"
             android:layout_gravity="center" />
+
+        <ProgressBar
+            android:id="@+id/pb_playback_control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
 
         <View
             android:id="@+id/play_pause_wrapper"

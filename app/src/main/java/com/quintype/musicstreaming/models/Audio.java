@@ -6,6 +6,7 @@ public class Audio implements Serializable {
 
 
     private int id;
+    private int duration;
     private String data;
     private String title;
     private String genre;
@@ -13,15 +14,15 @@ public class Audio implements Serializable {
     private String artwork;
     private String streamUrl;
 
-    public Audio(int id, String data, String title, String genre, String artist, String
-            artwork, String
-            streamUrl) {
+    public Audio(int id, int duration, String data, String title, String genre, String artist,
+                 String artwork, String streamUrl) {
         this.id = id;
         this.data = data;
-        this.title = title;
         this.genre = genre;
+        this.title = title;
         this.artist = artist;
         this.artwork = artwork;
+        this.duration = duration;
         this.streamUrl = streamUrl;
     }
 
@@ -79,5 +80,13 @@ public class Audio implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

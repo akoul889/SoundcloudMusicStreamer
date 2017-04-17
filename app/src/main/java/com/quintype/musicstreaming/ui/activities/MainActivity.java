@@ -7,11 +7,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.util.Pair;
 import android.view.View;
 import android.widget.Toast;
@@ -39,7 +35,7 @@ public class MainActivity extends PlayerActivity {
     boolean serviceBound = false;
     ArrayList<Audio> playList = new ArrayList<>();
     SlidingUpPanelLayout slidingUpPanelLayout;
-
+    QuickControlsFragment quickControlsFragment = new QuickControlsFragment();
 //    private PlaybackControlsFragment mControlsFragment;
 
     @Override
@@ -47,7 +43,7 @@ public class MainActivity extends PlayerActivity {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_main);
-        slidingUpPanelLayout = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
+        slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         setPanelSlideListeners(slidingUpPanelLayout);
         addFragment(SoundcloudListFragment.create(), null);
@@ -80,6 +76,9 @@ public class MainActivity extends PlayerActivity {
                     playAudio(((int) event.second));
                 }
                 break;
+            case Constants.EVENT_PLAY_PAUSE_CLICK:
+                presenter.playStream();
+                break;
             case Constants.EVENT_UPDATE_PLAYLIST:
                 playList.clear();
                 playList.addAll(getAudioFromTracks((ArrayList<Track>) event.second));
@@ -93,92 +92,14 @@ public class MainActivity extends PlayerActivity {
     private Collection<Audio> getAudioFromTracks(ArrayList<Track> trackList) {
         List<Audio> adioList = new ArrayList<>();
         for (Track track : trackList) {
-            Audio audio = new Audio(track.getId(), track.getDescription(), track.getTitle(), track
-                    .getGenre(),
-                    track.getUser().getUsername(), track.getArtworkUrl(), track.getStreamUrl() +
-                    "?client_id=" + getString(R.string.soundcloud_client_id));
+            Audio audio = new Audio(track.getId(), track.getDuration(), track.getDescription(),
+                    track.getTitle(), track.getGenre(), track.getUser().getUsername(), track
+                    .getArtworkUrl(), track.getStreamUrl() + "?client_id=" + getString(R.string
+                    .soundcloud_client_id));
             adioList.add(audio);
         }
         return adioList;
     }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Timber.d("Activity onStart");
-
-//        mControlsFragment = (PlaybackControlsFragment) getFragmentManager()
-//                .findFragmentById(R.id.fragment_playback_controls);
-//        if (mControlsFragment == null) {
-//            throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
-//        }
-
-        hidePlaybackControls();
-
-    }
-
-    protected void showPlaybackControls() {
-        Timber.d("showPlaybackControls");
-//        if (NetworkHelper.isOnline(this)) {
-//            getFragmentManager().beginTransaction()
-//                    .setCustomAnimations(
-//                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
-//                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
-//                    .show(mControlsFragment)
-//                    .commit();
-//        }
-    }
-
-    protected void hidePlaybackControls() {
-        Timber.d("hidePlaybackControls");
-//        getFragmentManager().beginTransaction()
-//                .hide(mControlsFragment)
-//                .commit();
-    }
-
-    protected boolean shouldShowControls() {
-        MediaControllerCompat mediaController = getSupportMediaController();
-        if (mediaController == null ||
-                mediaController.getMetadata() == null ||
-                mediaController.getPlaybackState() == null) {
-            return false;
-        }
-        switch (mediaController.getPlaybackState().getState()) {
-            case PlaybackStateCompat.STATE_ERROR:
-            case PlaybackStateCompat.STATE_NONE:
-            case PlaybackStateCompat.STATE_STOPPED:
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    // Callback that ensures that we are showing the controls
-    private final MediaControllerCompat.Callback mMediaControllerCallback =
-            new MediaControllerCompat.Callback() {
-                @Override
-                public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
-                    if (shouldShowControls()) {
-                        showPlaybackControls();
-                    } else {
-                        Timber.d("mediaControllerCallback.onPlaybackStateChanged: " +
-                                "hiding controls because state is ", state.getState());
-                        hidePlaybackControls();
-                    }
-                }
-
-                @Override
-                public void onMetadataChanged(MediaMetadataCompat metadata) {
-                    if (shouldShowControls()) {
-                        showPlaybackControls();
-                    } else {
-                        Timber.d("mediaControllerCallback.onMetadataChanged: " +
-                                "hiding controls because metadata is null");
-                        hidePlaybackControls();
-                    }
-                }
-            };
 
     //Binding this Client to the AudioPlayer Service
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -247,10 +168,10 @@ public class MainActivity extends PlayerActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            QuickControlsFragment fragment1 = new QuickControlsFragment();
             FragmentManager fragmentManager1 = getSupportFragmentManager();
             fragmentManager1.beginTransaction()
-                    .replace(R.id.quickcontrols_container, fragment1).commitAllowingStateLoss();
+                    .replace(R.id.quickcontrols_container, quickControlsFragment)
+                    .commitAllowingStateLoss();
             return "Executed";
         }
 
@@ -302,4 +223,46 @@ public class MainActivity extends PlayerActivity {
             }
         });
     }
+
+    @Override
+    public void initializeUI(Audio stream, boolean isPlaying) {
+        Timber.d("Playing " + stream.getTitle());
+        quickControlsFragment.initializePlayer(stream, isPlaying);
+    }
+
+    @Override
+    public void setLoading() {
+        quickControlsFragment.setLoading();
+    }
+
+    @Override
+    public void setToStopped() {
+        quickControlsFragment.setToStopped();
+    }
+
+    @Override
+    public void setToPlaying() {
+        quickControlsFragment.setToPlaying();
+    }
+
+    @Override
+    public void animateTo(Audio currentStream) {
+
+    }
+
+    @Override
+    public void updateTimer(String timeLeft) {
+
+    }
+
+    @Override
+    public void error(String error) {
+        Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showStreamsDialog(List<Audio> streams) {
+
+    }
+
 }

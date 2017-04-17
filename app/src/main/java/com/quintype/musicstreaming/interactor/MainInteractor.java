@@ -50,9 +50,10 @@ public class MainInteractor {
         this.connectivityManager = connectivityManager;
 
         streams = new ArrayList<>();
-        streams.add(new Audio(0,"","ABC XYZ","hello 1","akshay","bb","https://api.soundcloud" +
-                ".com/tracks/110697958/stream"));
-        streams.add(new Audio(1,"","XYZ ABC","hello 2","akshay","bbb","https://api.soundcloud.com/tracks/13262271/stream"));
+        streams.add(new Audio(0,1,"","Ed Sheeran - Shape Of You [FREE DOWNLOAD]","hello 1",
+                "SkyOnex","bb","https://api.soundcloud.com/tracks/301478633/stream"));
+        streams.add(new Audio(1,2,"","Ed Sheeran - Shape of You (NOTD Remix)","hello 2","XO " +
+                "Collective","bbb","https://api.soundcloud.com/tracks/301689536/stream"));
 //        streams.add(new Stream(0, "https://api.soundcloud.com/tracks/110697958/stream", application.getString(R.string.rainy_stream_title), application.getString(R.string.rainy_stream_desc), R.drawable.rain_background, R.drawable.rain_background_small));
 //        streams.add(new Stream(1, "https://api.soundcloud.com/tracks/13262271/stream", application.getString(R.string.ocean_stream_title), application.getString(R.string.ocean_stream_desc), R.drawable.ocean_background, R.drawable.ocean_background_small));
 //        streams.add(new Stream(2, "https://api.soundcloud.com/tracks/97924982/stream", application.getString(R.string.forest_stream_title), application.getString(R.string.forest_stream_desc), R.drawable.nature_background, R.drawable.nature_background_small));

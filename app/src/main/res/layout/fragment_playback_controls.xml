@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/root_view">
+<FrameLayout android:id="@+id/root_view"
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <FrameLayout
         android:id="@+id/quick_controls_frame"
@@ -16,12 +16,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/colorAccent"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#44000000" />
+            android:background="#44000000"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -40,7 +40,7 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:textColor="#ffffff"
-                android:textSize="25sp" />
+                android:textSize="25sp"/>
 
             <TextView
                 android:id="@+id/song_artist"
@@ -50,7 +50,7 @@
                 android:maxLines="1"
                 android:paddingTop="3dp"
                 android:textColor="#ffffff"
-                android:textSize="14sp" />
+                android:textSize="14sp"/>
 
             <SeekBar
                 android:id="@+id/song_progress"
@@ -62,7 +62,7 @@
                 android:maxHeight="2dp"
                 android:paddingTop="18dp"
                 android:progress="30"
-                android:tag="tint_accent_color" />
+                android:tag="tint_accent_color"/>
 
 
             <TextView
@@ -70,21 +70,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/song_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/song_elapsed_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ffffff"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
 
             <LinearLayout
@@ -104,7 +104,7 @@
                     android:scaleType="center"
                     app:materialIcon="skip_previous"
                     app:materialIconColor="#fff"
-                    app:materialIconSize="35dp" />
+                    app:materialIconSize="35dp"/>
 
                 <FrameLayout
                     android:layout_width="50dp"
@@ -118,13 +118,21 @@
                         android:id="@+id/playpause"
                         android:layout_width="23dp"
                         android:layout_height="23dp"
-                        android:layout_gravity="center" />
+                        android:layout_gravity="center"/>
+
+                    <ProgressBar
+                        android:id="@+id/pb_playback_control_expanded"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        android:theme="@style/AppTheme.WhiteAccent"/>
 
                     <View
                         android:id="@+id/playpausewrapper"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="?attr/selectableItemBackgroundBorderless" />
+                        android:background="?attr/selectableItemBackgroundBorderless"/>
 
                 </FrameLayout>
 
@@ -138,14 +146,14 @@
                     android:scaleType="center"
                     app:materialIcon="skip_next"
                     app:materialIconColor="#fff"
-                    app:materialIconSize="35dp" />
+                    app:materialIconSize="35dp"/>
             </LinearLayout>
 
         </LinearLayout>
     </FrameLayout>
 
 
-    <include layout="@layout/bottom_nowplaying_card" />
+    <include layout="@layout/bottom_nowplaying_card"/>
 
 
 </FrameLayout>

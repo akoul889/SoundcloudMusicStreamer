@@ -113,7 +113,7 @@ public class StreamService extends Service implements
                 R.layout.notification);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(android.R.drawable.stat_sys_headset)
                 .setShowWhen(false)
                 .setContent(notificationView);
 
@@ -123,7 +123,8 @@ public class StreamService extends Service implements
 
         Intent closeIntent = new Intent(getApplicationContext(), StreamService.class);
         closeIntent.setAction(ACTION_STOP);
-        PendingIntent pendingCloseIntent = PendingIntent.getService(getApplicationContext(), 1, closeIntent, 0);
+        PendingIntent pendingCloseIntent = PendingIntent.getService(getApplicationContext(), 1,
+                closeIntent, 0);
 
         notificationView.setOnClickPendingIntent(R.id.closeStream, pendingCloseIntent);
 
@@ -132,7 +133,8 @@ public class StreamService extends Service implements
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent
+                .FLAG_ONE_SHOT);
         builder.setContentIntent(resultPendingIntent);
 
         Notification notification = builder.build();
@@ -183,7 +185,8 @@ public class StreamService extends Service implements
 //            List<String> keys = Arrays.asList(getResources().getStringArray(R.array.api_keys));
 //            String key = keys.get((new Random()).nextInt(keys.size()));
 
-            player.setDataSource(this, Uri.parse(String.format("%s?client_id=%s", stream.getStreamUrl(), "fs2FkPBdYj7aNns0zJqgi8ZmR7CAXaBw")));
+            player.setDataSource(this, Uri.parse(String.format("%s?client_id=%s", stream
+                    .getStreamUrl(), getString(R.string.soundcloud_client_id))));
             player.setLooping(true);
             player.setVolume(MAX_VOLUME, MAX_VOLUME);
             currentStream = stream;
@@ -255,7 +258,8 @@ public class StreamService extends Service implements
                     broadcastManager.sendBroadcast(intent);
                     if (millisUntilFinished < TimeUnit.SECONDS.toMillis(30)) {
                         //lower the volume by respective step
-                        lowerVolume((int) ((int) millisUntilFinished/TimeUnit.SECONDS.toMillis(1)));
+                        lowerVolume((int) ((int) millisUntilFinished / TimeUnit.SECONDS.toMillis
+                                (1)));
                     }
                 }
 
@@ -272,11 +276,12 @@ public class StreamService extends Service implements
 
     /**
      * Lowers the volume of the stream to a step
+     *
      * @param step out of a max of 30
      */
     private void lowerVolume(int step) {
 
-        float voulme = ((float) step)/30f;
+        float voulme = ((float) step) / 30f;
         player.setVolume(voulme, voulme);
     }
 

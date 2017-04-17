@@ -15,6 +15,7 @@
 
 package com.quintype.musicstreaming.ui.fragments;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +37,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.quintype.musicstreaming.R;
+import com.quintype.musicstreaming.models.Audio;
+import com.quintype.musicstreaming.utils.Constants;
+import com.quintype.musicstreaming.utils.ImageUtils;
 import com.quintype.musicstreaming.widgets.PlayPauseButton;
 
 import net.steamcrafted.materialiconlib.MaterialIconView;
@@ -73,6 +78,7 @@ public class QuickControlsFragment extends Fragment {
     private View rootView;
     private View playPauseWrapper, playPauseWrapperExpanded;
     private MaterialIconView previous, next;
+    private ProgressBar streamProgress, streamProgressExpanded;
     private boolean duetoplaypause = false;
     private final View.OnClickListener mPlayPauseListener = new View.OnClickListener() {
         @Override
@@ -89,7 +95,9 @@ public class QuickControlsFragment extends Fragment {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-//                    MusicPlayer.playOrPause();
+                    callbacks.propagateEvent(new Pair<String, Object>(Constants
+                            .EVENT_PLAY_PAUSE_CLICK
+                            , Constants.EVENT_PLAY_PAUSE_CLICK));
                 }
             }, 200);
 
@@ -110,12 +118,16 @@ public class QuickControlsFragment extends Fragment {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-//                    MusicPlayer.playOrPause();
+
+                    callbacks.propagateEvent(new Pair<String, Object>(Constants
+                            .EVENT_PLAY_PAUSE_CLICK
+                            , Constants.EVENT_PLAY_PAUSE_CLICK));
                 }
             }, 200);
 
         }
     };
+    private FragmentCallbacks callbacks;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -140,6 +152,9 @@ public class QuickControlsFragment extends Fragment {
         next = (MaterialIconView) rootView.findViewById(R.id.next);
         previous = (MaterialIconView) rootView.findViewById(R.id.previous);
         topContainer = rootView.findViewById(R.id.topContainer);
+        streamProgress = (ProgressBar) rootView.findViewById(R.id.pb_playback_control);
+        streamProgressExpanded = (ProgressBar) rootView.findViewById(R.id
+                .pb_playback_control_expanded);
 
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mProgress
                 .getLayoutParams();
@@ -212,15 +227,15 @@ public class QuickControlsFragment extends Fragment {
         return rootView;
     }
 
-    public void updateNowplayingCard() {
+    public void updateNowplayingCard(Audio stream, boolean isPlaying) {
 //        mTitle.setText(MusicPlayer.getTrackName());
 //        mArtist.setText(MusicPlayer.getArtistName());
 //        mTitleExpanded.setText(MusicPlayer.getTrackName());
 //        mArtistExpanded.setText(MusicPlayer.getArtistName());
-        mTitle.setText("ABC");
-        mArtist.setText("ABC");
-        mTitleExpanded.setText("ABC");
-        mArtistExpanded.setText("ABC");
+        mTitle.setText(stream.getTitle());
+        mArtist.setText(stream.getArtist());
+        mTitleExpanded.setText(stream.getTitle());
+        mArtistExpanded.setText(stream.getArtist());
         if (!duetoplaypause) {
 //            ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer
 //                            .getCurrentAlbumId()).toString(), mAlbumArt,
@@ -287,10 +302,8 @@ public class QuickControlsFragment extends Fragment {
 
     }
 
-    public void updateState() {
-//        TODO fix this
-//      if (MusicPlayer.isPlaying()) {
-        if (true) {
+    public void updateState(boolean isPlaying) {
+        if (isPlaying) {
             if (!mPlayPause.isPlayed()) {
                 mPlayPause.setPlayed(true);
                 mPlayPause.startAnimation();
@@ -311,27 +324,14 @@ public class QuickControlsFragment extends Fragment {
         }
     }
 
-    public void restartLoader() {
-
-    }
-
-    public void onPlaylistChanged() {
-
-    }
-
-    public void onMetaChanged() {
-        updateNowplayingCard();
-        updateState();
-    }
-
     private class setBlurredAlbumArt extends AsyncTask<Bitmap, Void, Drawable> {
 
         @Override
         protected Drawable doInBackground(Bitmap... loadedImage) {
             Drawable drawable = null;
             try {
-//                drawable = ImageUtils.createBlurredImageFromBitmap(loadedImage[0], getActivity(),
-//                        6);
+                drawable = ImageUtils.createBlurredImageFromBitmap(loadedImage[0], getActivity(),
+                        6);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -359,6 +359,66 @@ public class QuickControlsFragment extends Fragment {
         @Override
         protected void onPreExecute() {
         }
+    }
+
+    public void initializePlayer(Audio stream, boolean isPlaying) {
+        updateNowplayingCard(stream, isPlaying);
+        updateState(isPlaying);
+    }
+
+    public void setLoading() {
+
+        streamProgress.setVisibility(View.VISIBLE);
+        streamProgressExpanded.setVisibility(View.VISIBLE);
+        mPlayPause.setVisibility(View.INVISIBLE);
+        mPlayPauseExpanded.setVisibility(View.INVISIBLE);
+//        nextButton.setEnabled(false);
+//        previousButton.setEnabled(false);
+//        showSoundsButton.setEnabled(false);
+//
+//        playButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pause_48dp));
+    }
+
+    public void setToPlaying() {
+
+        stopLoading();
+
+        updateState(true);
+    }
+
+    public void setToStopped() {
+
+        stopLoading();
+        updateState(false);
+    }
+
+    private void stopLoading() {
+
+        streamProgress.setVisibility(View.INVISIBLE);
+        streamProgressExpanded.setVisibility(View.INVISIBLE);
+        mPlayPause.setVisibility(View.VISIBLE);
+        mPlayPauseExpanded.setVisibility(View.VISIBLE);
+//        nextButton.setEnabled(true);
+//        previousButton.setEnabled(true);
+//        showSoundsButton.setEnabled(true);
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof FragmentCallbacks) {
+            callbacks = (FragmentCallbacks) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentCallbacks");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callbacks = null;
     }
 
 
