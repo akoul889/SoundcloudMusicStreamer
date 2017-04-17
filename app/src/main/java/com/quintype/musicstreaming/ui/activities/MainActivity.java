@@ -82,12 +82,17 @@ public class MainActivity extends PlayerActivity {
         }
     }
 
+    private String getHirezArtwork(String artworkUrl) {
+        return artworkUrl.replace("large.jpg", "t500x500.jpg");
+    }
+
     private Collection<Audio> getAudioFromTracks(ArrayList<Track> trackList) {
         List<Audio> adioList = new ArrayList<>();
         for (Track track : trackList) {
             Audio audio = new Audio(track.getId(), track.getDuration(), track.getDescription(),
-                    track.getTitle(), track.getGenre(), track.getUser().getUsername(), track
-                    .getArtworkUrl(), track.getStreamUrl() + "?client_id=" + getString(R.string
+                    track.getTitle(), track.getGenre(), track.getUser().getUsername(),
+                    getHirezArtwork(track.getArtworkUrl()), track.getStreamUrl() + "?client_id="
+                    + getString(R.string
                     .soundcloud_client_id));
             adioList.add(audio);
         }

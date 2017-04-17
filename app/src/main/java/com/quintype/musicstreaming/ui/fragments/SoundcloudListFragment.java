@@ -79,7 +79,7 @@ public class SoundcloudListFragment extends Fragment {
 
 
         Timber.d("Making the Call");
-        SoundCloudApiClient.getApiService().searchTracks("Layla", getString(R.string
+        SoundCloudApiClient.getApiService().searchTracks("shape of you", getString(R.string
                 .soundcloud_client_id)).enqueue(new Callback<List<Track>>() {
             @Override
             public void onResponse(Call<List<Track>> call, Response<List<Track>> response) {

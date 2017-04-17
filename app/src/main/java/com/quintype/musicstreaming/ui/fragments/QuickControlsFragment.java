@@ -36,6 +36,11 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.utils.Constants;
@@ -271,9 +276,28 @@ public class QuickControlsFragment extends Fragment {
 //                        }
 //                    });
 
-            Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.ic_empty_music2);
-            new setBlurredAlbumArt().execute(icon);
+            Glide.with(this).load(stream.getArtwork()).into(new GlideDrawableImageViewTarget
+                    (mAlbumArt) {
+                @Override
+                public void onResourceReady(GlideDrawable resource, GlideAnimation<? super
+                        GlideDrawable> animation) {
+                    super.onResourceReady(resource, animation);
+                    new setBlurredAlbumArt().execute(((GlideBitmapDrawable) mAlbumArt.getDrawable()
+                            .getCurrent()).getBitmap());
+                }
+
+                @Override
+                public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                    super.onLoadFailed(e, errorDrawable);
+                    Bitmap failedBitmap = BitmapFactory.decodeResource(getResources(), R.drawable
+                            .ic_empty_music2);
+                    new setBlurredAlbumArt().execute(failedBitmap);
+                }
+            });
+
+//            Bitmap icon = BitmapFactory.decodeResource(getResources(),
+//                    R.drawable.ic_empty_music2);
+//            new setBlurredAlbumArt().execute(icon);
         }
         duetoplaypause = false;
 //        mProgress.setMax((int) MusicPlayer.duration());
