@@ -42,26 +42,46 @@ public class MainInteractor {
 
     private List<Audio> streams;
     private Audio currentStream;
+    private int currentlyPlaying = 0;
 
-    public MainInteractor(Application application, SharedPreferences preferences, ConnectivityManager connectivityManager) {
+    public MainInteractor(Application application, SharedPreferences preferences,
+                          ConnectivityManager connectivityManager) {
 
         this.application = application;
         this.preferences = preferences;
         this.connectivityManager = connectivityManager;
 
         streams = new ArrayList<>();
-        streams.add(new Audio(0,1,"","Ed Sheeran - Shape Of You [FREE DOWNLOAD]","hello 1",
-                "SkyOnex","bb","https://api.soundcloud.com/tracks/301478633/stream"));
-        streams.add(new Audio(1,2,"","Ed Sheeran - Shape of You (NOTD Remix)","hello 2","XO " +
-                "Collective","bbb","https://api.soundcloud.com/tracks/301689536/stream"));
-//        streams.add(new Stream(0, "https://api.soundcloud.com/tracks/110697958/stream", application.getString(R.string.rainy_stream_title), application.getString(R.string.rainy_stream_desc), R.drawable.rain_background, R.drawable.rain_background_small));
-//        streams.add(new Stream(1, "https://api.soundcloud.com/tracks/13262271/stream", application.getString(R.string.ocean_stream_title), application.getString(R.string.ocean_stream_desc), R.drawable.ocean_background, R.drawable.ocean_background_small));
-//        streams.add(new Stream(2, "https://api.soundcloud.com/tracks/97924982/stream", application.getString(R.string.forest_stream_title), application.getString(R.string.forest_stream_desc), R.drawable.nature_background, R.drawable.nature_background_small));
-//        streams.add(new Stream(3, "https://api.soundcloud.com/tracks/149844883/stream", application.getString(R.string.meditation_stream_title), application.getString(R.string.meditation_stream_desc), R.drawable.meditation_background, R.drawable.meditation_background_small));
-//        streams.add(new Stream(4, "https://api.soundcloud.com/tracks/78048378/stream", application.getString(R.string.delta_waves_stream_title), application.getString(R.string.delta_waves_stream_desc), R.drawable.delta_waves_background, R.drawable.delta_waves_background_small));
-//        streams.add(new Stream(5, "https://api.soundcloud.com/tracks/210719226/stream", application.getString(R.string.lucid_stream_title), application.getString(R.string.lucid_stream_desc), R.drawable.lucid_background, R.drawable.lucid_background_small));
-//        streams.add(new Stream(6, "https://api.soundcloud.com/tracks/176629663/stream", application.getString(R.string.autumn_stream_title), application.getString(R.string.autumn_stream_desc), R.drawable.autumn_background, R.drawable.autumn_background_small));
-//        streams.add(new Stream(7, "https://api.soundcloud.com/tracks/189015106/stream", application.getString(R.string.void_stream_title), application.getString(R.string.void_stream_desc), R.drawable.void_background, R.drawable.void_background_small));
+//        streams.add(new Audio(0,1,"","Ed Sheeran - Shape Of You [FREE DOWNLOAD]","hello 1",
+//                "SkyOnex","bb","https://api.soundcloud.com/tracks/301478633/stream"));
+//        streams.add(new Audio(1,2,"","Ed Sheeran - Shape of You (NOTD Remix)","hello 2","XO " +
+//                "Collective","bbb","https://api.soundcloud.com/tracks/301689536/stream"));
+//        streams.add(new Stream(0, "https://api.soundcloud.com/tracks/110697958/stream",
+// application.getString(R.string.rainy_stream_title), application.getString(R.string
+// .rainy_stream_desc), R.drawable.rain_background, R.drawable.rain_background_small));
+//        streams.add(new Stream(1, "https://api.soundcloud.com/tracks/13262271/stream",
+// application.getString(R.string.ocean_stream_title), application.getString(R.string
+// .ocean_stream_desc), R.drawable.ocean_background, R.drawable.ocean_background_small));
+//        streams.add(new Stream(2, "https://api.soundcloud.com/tracks/97924982/stream",
+// application.getString(R.string.forest_stream_title), application.getString(R.string
+// .forest_stream_desc), R.drawable.nature_background, R.drawable.nature_background_small));
+//        streams.add(new Stream(3, "https://api.soundcloud.com/tracks/149844883/stream",
+// application.getString(R.string.meditation_stream_title), application.getString(R.string
+// .meditation_stream_desc), R.drawable.meditation_background, R.drawable
+// .meditation_background_small));
+//        streams.add(new Stream(4, "https://api.soundcloud.com/tracks/78048378/stream",
+// application.getString(R.string.delta_waves_stream_title), application.getString(R.string
+// .delta_waves_stream_desc), R.drawable.delta_waves_background, R.drawable
+// .delta_waves_background_small));
+//        streams.add(new Stream(5, "https://api.soundcloud.com/tracks/210719226/stream",
+// application.getString(R.string.lucid_stream_title), application.getString(R.string
+// .lucid_stream_desc), R.drawable.lucid_background, R.drawable.lucid_background_small));
+//        streams.add(new Stream(6, "https://api.soundcloud.com/tracks/176629663/stream",
+// application.getString(R.string.autumn_stream_title), application.getString(R.string
+// .autumn_stream_desc), R.drawable.autumn_background, R.drawable.autumn_background_small));
+//        streams.add(new Stream(7, "https://api.soundcloud.com/tracks/189015106/stream",
+// application.getString(R.string.void_stream_title), application.getString(R.string
+// .void_stream_desc), R.drawable.void_background, R.drawable.void_background_small));
     }
 
     public void startService(OnStreamServiceListener presenter) {
@@ -76,7 +96,8 @@ public class MainInteractor {
 
         if (!boundToService) {
             Log.i(TAG, "onStart: binding to service.");
-            boundToService = application.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+            boundToService = application.bindService(intent, serviceConnection, Context
+                    .BIND_AUTO_CREATE);
         }
         registerBroadcastReceiver();
     }
@@ -88,7 +109,8 @@ public class MainInteractor {
         broadcastIntentFilter.addAction(StreamService.STREAM_DONE_LOADING_INTENT);
         broadcastIntentFilter.addAction(StreamService.TIMER_DONE_INTENT);
         broadcastIntentFilter.addAction(StreamService.TIMER_UPDATE_INTENT);
-        LocalBroadcastManager.getInstance(application).registerReceiver((broadcastReceiver), broadcastIntentFilter);
+        LocalBroadcastManager.getInstance(application).registerReceiver((broadcastReceiver),
+                broadcastIntentFilter);
     }
 
     public void unbindService() {
@@ -99,7 +121,8 @@ public class MainInteractor {
         }
         LocalBroadcastManager.getInstance(application).unregisterReceiver(broadcastReceiver);
 
-        preferences.edit().putInt(LAST_STREAM_IDENTIFIER, currentStream != null ? currentStream.getId() : 0).apply();
+        preferences.edit().putInt(LAST_STREAM_IDENTIFIER, currentStream != null ?
+                currentlyPlaying : 0).apply();
     }
 
     public void playStream() {
@@ -136,6 +159,20 @@ public class MainInteractor {
         }
     }
 
+    public void playNewStream(int pos) {
+
+        if (pos != currentlyPlaying) {
+            updateCurrentlyPlaying(pos);
+            if (streamService.getState() == StreamService.State.PLAYING || streamService.getState
+                    () == StreamService.State.PAUSED) {
+                streamService.stopStreaming();
+                playStream();
+            }else{
+                playStream();
+            }
+        }
+    }
+
     public void nextStream() {
 
         int currentStreamId = currentStream.getId();
@@ -145,7 +182,8 @@ public class MainInteractor {
             currentStream = streams.get(0);
         }
 
-        if (streamService.getState() == StreamService.State.PLAYING || streamService.getState() == StreamService.State.PAUSED) {
+        if (streamService.getState() == StreamService.State.PLAYING || streamService.getState()
+                == StreamService.State.PAUSED) {
             streamService.stopStreaming();
             playStream();
         }
@@ -226,8 +264,10 @@ public class MainInteractor {
      * @return boolean indicating if the service runs
      */
     private boolean isServiceAlreadyRunning() {
-        ActivityManager manager = (ActivityManager) application.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+        ActivityManager manager = (ActivityManager) application.getSystemService(Context
+                .ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer
+                .MAX_VALUE)) {
             if (StreamService.class.getName().equals(service.service.getClassName())) {
                 return true;
             }
@@ -243,7 +283,8 @@ public class MainInteractor {
     private void handleIntent(Intent intent) {
 
         if (intent.getAction().equals(StreamService.STREAM_DONE_LOADING_INTENT)) {
-            boolean success = intent.getBooleanExtra(StreamService.STREAM_DONE_LOADING_SUCCESS, false);
+            boolean success = intent.getBooleanExtra(StreamService.STREAM_DONE_LOADING_SUCCESS,
+                    false);
             if (!success) {
                 presenter.streamStopped();
                 presenter.error(application.getString(R.string.stream_error_toast));
@@ -328,10 +369,12 @@ public class MainInteractor {
             if (currentStream != null) {
                 presenter.restoreUI(currentStream, streamService.getState() == StreamService
                         .State.PLAYING);
-            } else {
-                int last = preferences.getInt(LAST_STREAM_IDENTIFIER, 0);
-                currentStream = streams.get(last);
-                presenter.restoreUI(currentStream, false);
+            } else if (!streams.isEmpty()) {
+                if (!streams.isEmpty()) {
+                    int last = preferences.getInt(LAST_STREAM_IDENTIFIER, 0);
+                    currentStream = streams.get(last);
+                    presenter.restoreUI(currentStream, false);
+                }
             }
         }
 
@@ -349,4 +392,35 @@ public class MainInteractor {
             handleIntent(intent);
         }
     };
+
+
+    public void updatePlaylist(List<Audio> playlist) {
+        streams.clear();
+        streams.addAll(playlist);
+        if (currentStream != null) {
+            for (int i = 0; i < streams.size(); i++) {
+                Audio stream = streams.get(i);
+                if (currentStream.getId() == stream.getId()) {
+                    currentlyPlaying = i;
+                    break;
+                }
+
+            }
+        }
+        updateCurrentlyPlaying(currentlyPlaying);
+    }
+
+    public void updateCurrentlyPlaying(int pos) {
+        if (!streams.isEmpty()) {
+            if ((streams.size() > pos)) {
+                currentlyPlaying = pos;
+                currentStream = streams.get(currentlyPlaying);
+
+            } else {
+                currentlyPlaying = 0;
+                currentStream = streams.get(currentlyPlaying);
+            }
+            presenter.restoreUI(currentStream, false);
+        }
+    }
 }

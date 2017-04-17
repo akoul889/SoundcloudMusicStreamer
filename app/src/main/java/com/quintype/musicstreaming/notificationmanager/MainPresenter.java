@@ -112,4 +112,12 @@ public class MainPresenter implements OnStreamServiceListener {
 
         view.showStreamsDialog(streams);
     }
+
+    public void updatePlaylist(List<Audio> streams){
+        interactor.updatePlaylist(streams);
+    }
+
+    public void playNewTrack(int pos){
+        interactor.playNewStream(pos);
+    }
 }

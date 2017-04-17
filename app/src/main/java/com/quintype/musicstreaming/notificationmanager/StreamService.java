@@ -185,8 +185,9 @@ public class StreamService extends Service implements
 //            List<String> keys = Arrays.asList(getResources().getStringArray(R.array.api_keys));
 //            String key = keys.get((new Random()).nextInt(keys.size()));
 
-            player.setDataSource(this, Uri.parse(String.format("%s?client_id=%s", stream
-                    .getStreamUrl(), getString(R.string.soundcloud_client_id))));
+            player.setDataSource(this, Uri.parse(stream.getStreamUrl()));
+//            player.setDataSource(this, Uri.parse(String.format("%s?client_id=%s", stream
+//                    .getStreamUrl(), getString(R.string.soundcloud_client_id))));
             player.setLooping(true);
             player.setVolume(MAX_VOLUME, MAX_VOLUME);
             currentStream = stream;

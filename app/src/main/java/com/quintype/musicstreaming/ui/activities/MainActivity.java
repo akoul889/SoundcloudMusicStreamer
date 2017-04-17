@@ -1,12 +1,7 @@
 package com.quintype.musicstreaming.ui.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.view.View;
@@ -15,12 +10,10 @@ import android.widget.Toast;
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.models.Track;
-import com.quintype.musicstreaming.notificationmanager.MediaService;
 import com.quintype.musicstreaming.ui.fragments.QuickControlsFragment;
 import com.quintype.musicstreaming.ui.fragments.SoundcloudListFragment;
 import com.quintype.musicstreaming.ui.slidinguppanel.SlidingUpPanelLayout;
 import com.quintype.musicstreaming.utils.Constants;
-import com.quintype.musicstreaming.utils.StorageUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,8 +24,6 @@ import timber.log.Timber;
 public class MainActivity extends PlayerActivity {
 
 
-    private MediaService player;
-    boolean serviceBound = false;
     ArrayList<Audio> playList = new ArrayList<>();
     SlidingUpPanelLayout slidingUpPanelLayout;
     QuickControlsFragment quickControlsFragment = new QuickControlsFragment();
@@ -73,7 +64,8 @@ public class MainActivity extends PlayerActivity {
 //                showPlaybackControls();
 //                    playAudio(audio.getStreamUrl() + "?client_id=" + getString(R.string
 //                            .soundcloud_client_id));
-                    playAudio(((int) event.second));
+//                    playAudio(((int) event.second));
+                    presenter.playNewTrack((int) event.second);
                 }
                 break;
             case Constants.EVENT_PLAY_PAUSE_CLICK:
@@ -82,6 +74,7 @@ public class MainActivity extends PlayerActivity {
             case Constants.EVENT_UPDATE_PLAYLIST:
                 playList.clear();
                 playList.addAll(getAudioFromTracks((ArrayList<Track>) event.second));
+                presenter.updatePlaylist(playList);
                 break;
             default:
                 Toast.makeText(mContext, "Unhandled event " + event.first, Toast.LENGTH_SHORT)
@@ -101,68 +94,29 @@ public class MainActivity extends PlayerActivity {
         return adioList;
     }
 
-    //Binding this Client to the AudioPlayer Service
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaService.LocalBinder binder = (MediaService.LocalBinder) service;
-            player = binder.getService();
-            serviceBound = true;
-
-            Toast.makeText(MainActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
-
     private void playAudio(int audioIndex) {
         //Check is service is active
-        if (!serviceBound) {
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(getApplicationContext());
-            storage.storeAudio(playList);
-            storage.storeAudioIndex(audioIndex);
-
-            Intent playerIntent = new Intent(this, MediaService.class);
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            //Store the new audioIndex to SharedPreferences
-            StorageUtil storage = new StorageUtil(getApplicationContext());
-            storage.storeAudioIndex(audioIndex);
-
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Constants.Broadcast_PLAY_NEW_AUDIO);
-            sendBroadcast(broadcastIntent);
-        }
+//        if (!serviceBound) {
+//            //Store Serializable audioList to SharedPreferences
+//            StorageUtil storage = new StorageUtil(getApplicationContext());
+//            storage.storeAudio(playList);
+//            storage.storeAudioIndex(audioIndex);
+//
+//            Intent playerIntent = new Intent(this, MediaService.class);
+//            startService(playerIntent);
+//            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        } else {
+//            //Store the new audioIndex to SharedPreferences
+//            StorageUtil storage = new StorageUtil(getApplicationContext());
+//            storage.storeAudioIndex(audioIndex);
+//
+//            //Service is active
+//            //Send a broadcast to the service -> PLAY_NEW_AUDIO
+//            Intent broadcastIntent = new Intent(Constants.Broadcast_PLAY_NEW_AUDIO);
+//            sendBroadcast(broadcastIntent);
+//        }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean("ServiceState", serviceBound);
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        serviceBound = savedInstanceState.getBoolean("ServiceState");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (serviceBound) {
-            unbindService(serviceConnection);
-            //service is active
-            player.stopSelf();
-        }
-    }
 
     public class initQuickControls extends AsyncTask<String, Void, String> {
 
