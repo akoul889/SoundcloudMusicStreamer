@@ -167,7 +167,7 @@ public class MainInteractor {
                     () == StreamService.State.PAUSED) {
                 streamService.stopStreaming();
                 playStream();
-            }else{
+            } else {
                 playStream();
             }
         }
@@ -175,11 +175,10 @@ public class MainInteractor {
 
     public void nextStream() {
 
-        int currentStreamId = currentStream.getId();
-        if (currentStreamId != (streams.size() - 1)) {
-            currentStream = streams.get(currentStreamId + 1);
+        if (currentlyPlaying != (streams.size() - 1)) {
+            updateCurrentlyPlaying(currentlyPlaying + 1);
         } else {
-            currentStream = streams.get(0);
+            updateCurrentlyPlaying(0);
         }
 
         if (streamService.getState() == StreamService.State.PLAYING || streamService.getState()
@@ -195,9 +194,9 @@ public class MainInteractor {
 
         int currentStreamId = currentStream.getId();
         if (currentStreamId != 0) {
-            currentStream = streams.get(currentStreamId - 1);
+            updateCurrentlyPlaying(currentStreamId - 1);
         } else {
-            currentStream = streams.get(streams.size() - 1);
+            updateCurrentlyPlaying(streams.size() - 1);
         }
 
         if (streamService.getState() == StreamService.State.PLAYING || streamService.getState()

@@ -195,7 +195,9 @@ public class QuickControlsFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-//                        MusicPlayer.next();
+                        callbacks.propagateEvent(new Pair<String, Object>(Constants
+                                .EVENT_NEXT_CLICK
+                                , Constants.EVENT_NEXT_CLICK));
                     }
                 }, 200);
 
@@ -209,7 +211,9 @@ public class QuickControlsFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-//                        MusicPlayer.previous(getActivity(), false);
+                        callbacks.propagateEvent(new Pair<String, Object>(Constants
+                                .EVENT_PREVIOUS_CLICK
+                                , Constants.EVENT_PREVIOUS_CLICK));
                     }
                 }, 200);
 

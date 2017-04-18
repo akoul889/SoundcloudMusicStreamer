@@ -71,6 +71,12 @@ public class MainActivity extends PlayerActivity {
             case Constants.EVENT_PLAY_PAUSE_CLICK:
                 presenter.playStream();
                 break;
+            case Constants.EVENT_NEXT_CLICK:
+                presenter.nextStream();
+                break;
+            case Constants.EVENT_PREVIOUS_CLICK:
+                presenter.previousStream();
+                break;
             case Constants.EVENT_UPDATE_PLAYLIST:
                 playList.clear();
                 playList.addAll(getAudioFromTracks((ArrayList<Track>) event.second));

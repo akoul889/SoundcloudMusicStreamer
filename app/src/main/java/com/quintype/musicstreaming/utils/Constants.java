@@ -11,6 +11,8 @@ public class Constants {
     public static final String EVENT_TRACK_CLICK = "track_click";
     public static final String EVENT_UPDATE_PLAYLIST = "update_play_list";
     public static final String EVENT_PLAY_PAUSE_CLICK = "play_pause_click";
+    public static final String EVENT_NEXT_CLICK = "next_click";
+    public static final String EVENT_PREVIOUS_CLICK = "previous_click";
 
 
     //Broadcasts
