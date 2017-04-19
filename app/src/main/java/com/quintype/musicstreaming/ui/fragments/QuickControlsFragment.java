@@ -55,24 +55,22 @@ public class QuickControlsFragment extends Fragment {
     public static View topContainer;
     private ProgressBar mProgress;
     private SeekBar mSeekBar;
-    int newpos = 0;
+
+    Handler seekbarHandler = new Handler();
     public Runnable mUpdateProgress = new Runnable() {
 
         @Override
         public void run() {
 
-            int dummyPosition = 10;
-//            long position = MusicPlayer.position();
-//            mProgress.setProgress((int) position);
-//            mSeekBar.setProgress((int) position);
-            mProgress.setProgress((int) newpos);
-            mSeekBar.setProgress((int) newpos);
+            if (callbacks != null) {
+                long position = callbacks.getCurrentTrackPosition();
+                mProgress.setProgress((int) position);
+                mSeekBar.setProgress((int) position);
 
-            newpos += dummyPosition;
-//            if (MusicPlayer.isPlaying()) {
-            if (newpos < 100) {
-                mProgress.postDelayed(mUpdateProgress, 50);
-            } else mProgress.removeCallbacks(this);
+                if (callbacks.isPlaying()) {
+                    mProgress.postDelayed(mUpdateProgress, 50);
+                } else mProgress.removeCallbacks(this);
+            }
 
         }
     };
@@ -132,7 +130,7 @@ public class QuickControlsFragment extends Fragment {
 
         }
     };
-    private FragmentCallbacks callbacks;
+    private MusicFragmentCallbacks callbacks;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -304,11 +302,9 @@ public class QuickControlsFragment extends Fragment {
 //            new setBlurredAlbumArt().execute(icon);
         }
         duetoplaypause = false;
-//        mProgress.setMax((int) MusicPlayer.duration());
-//        mSeekBar.setMax((int) MusicPlayer.duration());
-        mProgress.setMax((int) 100);
-        mSeekBar.setMax((int) 100);
-        mProgress.postDelayed(mUpdateProgress, 10);
+        mProgress.setMax((int) stream.getDuration());
+        mSeekBar.setMax((int) stream.getDuration());
+        seekbarHandler.postDelayed(mUpdateProgress, 500);
     }
 
     @Override
@@ -435,8 +431,8 @@ public class QuickControlsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentCallbacks) {
-            callbacks = (FragmentCallbacks) context;
+        if (context instanceof MusicFragmentCallbacks) {
+            callbacks = (MusicFragmentCallbacks) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement FragmentCallbacks");
@@ -448,6 +444,4 @@ public class QuickControlsFragment extends Fragment {
         super.onDetach();
         callbacks = null;
     }
-
-
 }

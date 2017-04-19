@@ -422,4 +422,12 @@ public class MainInteractor {
             presenter.restoreUI(currentStream, false);
         }
     }
+
+    public int getCurrentMediaPosition() {
+        return streamService.getCurrentStreamPosition();
+    }
+
+    public boolean isMediaPlaying() {
+        return (streamService.getState() != StreamService.State.STOPPED);
+    }
 }

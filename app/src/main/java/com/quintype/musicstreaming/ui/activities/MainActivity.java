@@ -128,6 +128,15 @@ public class MainActivity extends PlayerActivity {
 //        }
     }
 
+    @Override
+    public int getCurrentTrackPosition() {
+        return presenter.getCurrentMediaPosition();
+    }
+
+    @Override
+    public boolean isPlaying(){
+        return presenter.isMediaPlaying();
+    }
 
     public class initQuickControls extends AsyncTask<String, Void, String> {
 

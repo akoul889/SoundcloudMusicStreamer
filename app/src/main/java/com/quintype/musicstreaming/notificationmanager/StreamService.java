@@ -239,6 +239,20 @@ public class StreamService extends Service implements
         return null;
     }
 
+
+    /**
+     * Get the current position of stream
+     *
+     * @return the playing stream or null
+     */
+    public int getCurrentStreamPosition() {
+
+        if (state == State.PLAYING || state == State.PAUSED) {
+            return player.getCurrentPosition();
+        }
+        return 0;
+    }
+
     /**
      * Set a sleep timer
      *

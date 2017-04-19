@@ -13,7 +13,7 @@ import com.quintype.musicstreaming.notificationmanager.MainPresenter;
  * Created by akshaykoul on 16/04/17.
  */
 
-public abstract class PlayerActivity extends BaseFragmentActivity implements UIinteractor{
+public abstract class PlayerActivity extends MusicFragmentActivity implements UIinteractor{
 
     protected MainInteractor mainInteractor;
     MainPresenter presenter;

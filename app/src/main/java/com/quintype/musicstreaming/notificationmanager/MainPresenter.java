@@ -120,4 +120,12 @@ public class MainPresenter implements OnStreamServiceListener {
     public void playNewTrack(int pos){
         interactor.playNewStream(pos);
     }
+
+    public int getCurrentMediaPosition(){
+        return interactor.getCurrentMediaPosition();
+    }
+
+    public boolean isMediaPlaying() {
+        return interactor.isMediaPlaying();
+    }
 }
