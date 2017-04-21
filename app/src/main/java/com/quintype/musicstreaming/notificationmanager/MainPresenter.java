@@ -128,4 +128,8 @@ public class MainPresenter implements OnStreamServiceListener {
     public boolean isMediaPlaying() {
         return interactor.isMediaPlaying();
     }
+
+    public void seek(int pos){
+        interactor.seek(pos);
+    }
 }

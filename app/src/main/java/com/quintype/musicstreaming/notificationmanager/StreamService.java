@@ -357,4 +357,21 @@ public class StreamService extends Service implements
     public void onDestroy() {
         stopForeground(true);
     }
+
+
+    /**
+     * Seek up to a position on a media player
+     * @param position seek position
+     */
+    public void seek(int position) {
+        if (player != null) {
+            if (position < 0) {
+                position = 0;
+            } else if (position > currentStream.getDuration()) {
+                position = currentStream.getDuration();
+            }
+            player.seekTo((int) position);
+//            notifyChange(POSITION_CHANGED);
+        }
+    }
 }

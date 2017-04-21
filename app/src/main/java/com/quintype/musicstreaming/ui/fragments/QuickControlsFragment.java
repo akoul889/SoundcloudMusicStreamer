@@ -173,7 +173,7 @@ public class QuickControlsFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if (b) {
-//                    MusicPlayer.seek((long) i);
+                    callbacks.seek(i);
                 }
             }
 
@@ -244,40 +244,6 @@ public class QuickControlsFragment extends Fragment {
         mTitleExpanded.setText(stream.getTitle());
         mArtistExpanded.setText(stream.getArtist());
         if (!duetoplaypause) {
-//            ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer
-//                            .getCurrentAlbumId()).toString(), mAlbumArt,
-//                    new DisplayImageOptions.Builder().cacheInMemory(true)
-//                            .showImageOnFail(R.drawable.ic_empty_music2)
-//                            .resetViewBeforeLoading(true)
-//                            .build(), new ImageLoadingListener() {
-//                        @Override
-//                        public void onLoadingStarted(String imageUri, View view) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onLoadingFailed(String imageUri, View view, FailReason
-//                                failReason) {
-//                            Bitmap failedBitmap = ImageLoader.getInstance().loadImageSync
-//                                    ("drawable://" + R.drawable.ic_empty_music2);
-//                            if (getActivity() != null)
-//                                new setBlurredAlbumArt().execute(failedBitmap);
-//                        }
-//
-//                        @Override
-//                        public void onLoadingComplete(String imageUri, View view, Bitmap
-//                                loadedImage) {
-//                            if (getActivity() != null)
-//                                new setBlurredAlbumArt().execute(loadedImage);
-//
-//                        }
-//
-//                        @Override
-//                        public void onLoadingCancelled(String imageUri, View view) {
-//
-//                        }
-//                    });
-
             Glide.with(this).load(stream.getArtwork()).into(new GlideDrawableImageViewTarget
                     (mAlbumArt) {
                 @Override

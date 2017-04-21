@@ -138,6 +138,11 @@ public class MainActivity extends PlayerActivity {
         return presenter.isMediaPlaying();
     }
 
+    @Override
+    public void  seek(int pos){
+        presenter.seek(pos);
+    }
+
     public class initQuickControls extends AsyncTask<String, Void, String> {
 
         @Override

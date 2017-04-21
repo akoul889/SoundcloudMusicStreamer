@@ -427,7 +427,18 @@ public class MainInteractor {
         return streamService.getCurrentStreamPosition();
     }
 
+    /**
+    * Check if the player is not stopped */
     public boolean isMediaPlaying() {
         return (streamService.getState() != StreamService.State.STOPPED);
     }
+
+    /**
+     * Seek up to a position on a media player
+     * @param pos
+     */
+    public void seek(int pos){
+        streamService.seek(pos);
+    }
+
 }

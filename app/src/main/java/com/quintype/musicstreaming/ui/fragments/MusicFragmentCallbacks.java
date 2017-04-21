@@ -9,4 +9,6 @@ public interface MusicFragmentCallbacks extends FragmentCallbacks{
     public int getCurrentTrackPosition();
 
     public boolean isPlaying();
+
+    public void seek(int position);
 }
