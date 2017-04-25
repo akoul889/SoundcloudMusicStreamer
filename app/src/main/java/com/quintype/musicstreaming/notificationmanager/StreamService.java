@@ -13,7 +13,9 @@ import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.media.MediaMetadataCompat;
@@ -25,9 +27,13 @@ import android.util.Log;
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
+
+import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
+import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
 
 /**
  * @author Niels Masdorp (NielsMasdorp)
@@ -62,6 +68,7 @@ public class StreamService extends Service implements
 
     //AudioPlayer notification ID
     private static final int NOTIFICATION_ID = 101;
+    private AudioManager mAudioManager;
 
 
     public enum State {PAUSED, STOPPED, PLAYING, PREPARING}
@@ -73,6 +80,8 @@ public class StreamService extends Service implements
     private Audio currentStream;
     private LocalBroadcastManager broadcastManager;
     private CountDownTimer countDownTimer;
+
+    private static final int STOP_DELAY = 30000;
 
     public void onCreate() {
         super.onCreate();
@@ -86,9 +95,11 @@ public class StreamService extends Service implements
         player.setOnPreparedListener(this);
         player.setOnCompletionListener(this);
         player.setOnErrorListener(this);
-
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         broadcastManager = LocalBroadcastManager.getInstance(this);
     }
+
+    private final DelayedStopHandler mDelayedStopHandler = new DelayedStopHandler(this);
 
     public class StreamBinder extends Binder {
         public StreamService getService() {
@@ -264,6 +275,15 @@ public class StreamService extends Service implements
      */
     public void playStream(Audio stream) {
 
+        int status = mAudioManager.requestAudioFocus(mAudioFocusListener,
+                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+
+
+        mDelayedStopHandler.removeCallbacksAndMessages(null);
+        if (status != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            return;
+        }
+
         // If a stream was already running stop it and reset
         if (player.isPlaying()) {
             player.stop();
@@ -292,6 +312,9 @@ public class StreamService extends Service implements
     public void pauseStream() {
 
         if (state == State.PLAYING) {
+
+            mDelayedStopHandler.removeCallbacksAndMessages(null);
+            mDelayedStopHandler.sendEmptyMessageDelayed(0, STOP_DELAY);
             player.pause();
             stopSleepTimer();
             state = State.PAUSED;
@@ -301,6 +324,8 @@ public class StreamService extends Service implements
     public void resumeStream() {
 
         if (state == State.PAUSED) {
+
+            mDelayedStopHandler.removeCallbacksAndMessages(null);
             player.start();
             state = State.PLAYING;
         }
@@ -312,6 +337,8 @@ public class StreamService extends Service implements
     public void stopStreaming() {
 
         if (state == State.PLAYING || state == State.PAUSED) {
+            mDelayedStopHandler.removeCallbacksAndMessages(null);
+            mDelayedStopHandler.sendEmptyMessageDelayed(0, STOP_DELAY);
             player.stop();
             player.reset();
             state = State.STOPPED;
@@ -448,6 +475,8 @@ public class StreamService extends Service implements
     @Override
     public void onDestroy() {
         stopForeground(true);
+        mAudioManager.abandonAudioFocus(mAudioFocusListener);
+        mDelayedStopHandler.removeCallbacksAndMessages(null);
     }
 
 
@@ -586,6 +615,54 @@ public class StreamService extends Service implements
                     .putString(MediaMetadataCompat.METADATA_KEY_GENRE, currentStream.getGenre())
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentStream.getTitle())
                     .build());
+        }
+    }
+
+    private final AudioManager.OnAudioFocusChangeListener mAudioFocusListener = new AudioManager
+            .OnAudioFocusChangeListener() {
+
+        @Override
+        public void onAudioFocusChange(final int focusChange) {
+            if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT) {
+                // Pause playback
+                pauseStream();
+            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                // Resume playback
+                resumeStream();
+            } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                mAudioManager.abandonAudioFocus(this);
+                // Stop playback
+            } else if (focusChange == AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                // Lower the volume
+                pauseStream();
+            } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+                // Raise it back to normal
+                resumeStream();
+            }
+        }
+    };
+
+    /**
+     * A simple handler that stops the service if playback is not active (playing)
+     */
+    private static class DelayedStopHandler extends Handler {
+        private final WeakReference<StreamService> mWeakReference;
+
+        private DelayedStopHandler(StreamService service) {
+            mWeakReference = new WeakReference<>(service);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            StreamService service = mWeakReference.get();
+            if (service != null && service.player != null) {
+                if (service.player.isPlaying() || service.state == State.PLAYING) {
+                    Timber.d("Ignoring delayed stop since the media player is in use.");
+                    return;
+                }
+                Timber.d("Stopping service with delay handler.");
+                service.stopSelf();
+            }
         }
     }
 }
