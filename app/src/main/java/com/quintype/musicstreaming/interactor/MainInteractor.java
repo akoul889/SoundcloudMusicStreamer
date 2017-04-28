@@ -19,6 +19,7 @@ import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.notificationmanager.OnStreamServiceListener;
 import com.quintype.musicstreaming.notificationmanager.StreamService;
+import com.quintype.musicstreaming.utils.StorageUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +46,20 @@ public class MainInteractor {
     private int currentlyPlaying = 0;
 
     public MainInteractor(Application application, SharedPreferences preferences,
-                          ConnectivityManager connectivityManager) {
+                          ConnectivityManager connectivityManager, StorageUtil storage) {
 
         this.application = application;
         this.preferences = preferences;
         this.connectivityManager = connectivityManager;
 
-        streams = new ArrayList<>();
+
+        streams = storage.loadAudio();
+        if (streams != null) {
+            currentlyPlaying = storage.loadAudioIndex();
+            currentStream = streams.get(currentlyPlaying);
+        } else {
+            streams = new ArrayList<>();
+        }
     }
 
     public void startService(OnStreamServiceListener presenter) {
@@ -157,7 +165,6 @@ public class MainInteractor {
             playStream();
         }
 
-        presenter.animateTo(currentStream);
     }
 
     public void previousStream() {
@@ -175,7 +182,6 @@ public class MainInteractor {
             playStream();
         }
 
-        presenter.animateTo(currentStream);
     }
 
     public void setSleepTimer(int option) {
@@ -190,22 +196,6 @@ public class MainInteractor {
     public void getAllStreams() {
 
         presenter.showAllStreams(streams);
-    }
-
-    public void streamPicked(Audio stream) {
-
-        if (stream.getId() != currentStream.getId()) {
-
-            currentStream = stream;
-
-            if (streamService.getState() == StreamService.State.PLAYING || streamService.getState
-                    () == StreamService.State.PAUSED) {
-                streamService.stopStreaming();
-                playStream();
-            }
-
-            presenter.animateTo(currentStream);
-        }
     }
 
     public boolean isStreamWifiOnly() {
@@ -398,16 +388,18 @@ public class MainInteractor {
     }
 
     /**
-    * Check if the player is not stopped */
+     * Check if the player is not stopped
+     */
     public boolean isMediaPlaying() {
         return (streamService.getState() != StreamService.State.STOPPED);
     }
 
     /**
      * Seek up to a position on a media player
+     *
      * @param pos
      */
-    public void seek(int pos){
+    public void seek(int pos) {
         streamService.seek(pos);
     }
 

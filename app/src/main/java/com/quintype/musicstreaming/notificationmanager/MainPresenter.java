@@ -3,7 +3,9 @@ package com.quintype.musicstreaming.notificationmanager;
 import com.quintype.musicstreaming.interactor.MainInteractor;
 import com.quintype.musicstreaming.models.Audio;
 import com.quintype.musicstreaming.ui.activities.UIinteractor;
+import com.quintype.musicstreaming.utils.StorageUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,11 +55,6 @@ public class MainPresenter implements OnStreamServiceListener {
     public void getAllStreams() {
 
         interactor.getAllStreams();
-    }
-
-    public void streamPicked(Audio stream) {
-
-        interactor.streamPicked(stream);
     }
 
     public boolean isStreamWifiOnly() {
@@ -113,15 +110,18 @@ public class MainPresenter implements OnStreamServiceListener {
         view.showStreamsDialog(streams);
     }
 
-    public void updatePlaylist(List<Audio> streams){
+    public void updatePlaylist(ArrayList<Audio> streams, StorageUtil storage) {
+        storage.storeAudio(streams);
         interactor.updatePlaylist(streams);
     }
 
-    public void playNewTrack(int pos){
-        interactor.playNewStream(pos);
+    public void playNewTrack(ArrayList<Audio> streams, int audioIndex, StorageUtil storage) {
+        updatePlaylist(streams, storage);
+        storage.storeAudioIndex(audioIndex);
+        interactor.playNewStream(audioIndex);
     }
 
-    public int getCurrentMediaPosition(){
+    public int getCurrentMediaPosition() {
         return interactor.getCurrentMediaPosition();
     }
 
@@ -129,7 +129,7 @@ public class MainPresenter implements OnStreamServiceListener {
         return interactor.isMediaPlaying();
     }
 
-    public void seek(int pos){
+    public void seek(int pos) {
         interactor.seek(pos);
     }
 }

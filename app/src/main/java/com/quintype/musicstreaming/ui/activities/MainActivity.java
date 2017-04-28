@@ -9,14 +9,14 @@ import android.widget.Toast;
 
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
-import com.quintype.musicstreaming.models.Track;
+import com.quintype.musicstreaming.models.NowPlaying;
 import com.quintype.musicstreaming.ui.fragments.QuickControlsFragment;
 import com.quintype.musicstreaming.ui.fragments.SoundcloudListFragment;
 import com.quintype.musicstreaming.ui.slidinguppanel.SlidingUpPanelLayout;
 import com.quintype.musicstreaming.utils.Constants;
+import com.quintype.musicstreaming.utils.StorageUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import timber.log.Timber;
@@ -24,10 +24,10 @@ import timber.log.Timber;
 public class MainActivity extends PlayerActivity {
 
 
-    ArrayList<Audio> playList = new ArrayList<>();
     SlidingUpPanelLayout slidingUpPanelLayout;
     QuickControlsFragment quickControlsFragment = new QuickControlsFragment();
-//    private PlaybackControlsFragment mControlsFragment;
+    //    private PlaybackControlsFragment mControlsFragment;
+    StorageUtil storageUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,7 @@ public class MainActivity extends PlayerActivity {
         mContext = this;
         setContentView(R.layout.activity_main);
         slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
+        storageUtil = new StorageUtil(getApplicationContext());
         setPanelSlideListeners(slidingUpPanelLayout);
         addFragment(SoundcloudListFragment.create(), null);
         new initQuickControls().execute("");
@@ -56,17 +56,11 @@ public class MainActivity extends PlayerActivity {
     public void propagateEvent(Pair<String, Object> event) {
         switch (event.first) {
             case Constants.EVENT_TRACK_CLICK:
-                if (!playList.isEmpty()) {
-                    Audio audio = playList.get(((int) event.second));
-                    Toast.makeText(mContext, "Track clicked =" + audio.getTitle(),
-                            Toast.LENGTH_SHORT).show();
-//                hidePlaybackControls();
-//                showPlaybackControls();
-//                    playAudio(audio.getStreamUrl() + "?client_id=" + getString(R.string
-//                            .soundcloud_client_id));
-//                    playAudio(((int) event.second));
-                    presenter.playNewTrack((int) event.second);
-                }
+                ArrayList<Audio> nowPlayingList = ((NowPlaying) event.second).getmNowPlayingList();
+                int nowPlayingPos = ((NowPlaying) event.second).getmNowplayingPosition();
+                Audio audio = nowPlayingList.get(nowPlayingPos);
+                Toast.makeText(mContext, "Track clicked =" + audio.getTitle(), Toast.LENGTH_SHORT);
+                presenter.playNewTrack(nowPlayingList, nowPlayingPos, storageUtil);
                 break;
             case Constants.EVENT_PLAY_PAUSE_CLICK:
                 presenter.playStream();
@@ -78,9 +72,9 @@ public class MainActivity extends PlayerActivity {
                 presenter.previousStream();
                 break;
             case Constants.EVENT_UPDATE_PLAYLIST:
-                playList.clear();
-                playList.addAll(getAudioFromTracks((ArrayList<Track>) event.second));
-                presenter.updatePlaylist(playList);
+//                playList.clear();
+//                playList.addAll(getAudioFromTracks((ArrayList<Track>) event.second));
+//                presenter.updatePlaylist(playList);
                 break;
             default:
                 Toast.makeText(mContext, "Unhandled event " + event.first, Toast.LENGTH_SHORT)
@@ -88,22 +82,6 @@ public class MainActivity extends PlayerActivity {
         }
     }
 
-    private String getHirezArtwork(String artworkUrl) {
-        return artworkUrl.replace("large.jpg", "t500x500.jpg");
-    }
-
-    private Collection<Audio> getAudioFromTracks(ArrayList<Track> trackList) {
-        List<Audio> adioList = new ArrayList<>();
-        for (Track track : trackList) {
-            Audio audio = new Audio(track.getId(), track.getDuration(), track.getDescription(),
-                    track.getTitle(), track.getGenre(), track.getUser().getUsername(),
-                    getHirezArtwork(track.getArtworkUrl()), track.getStreamUrl() + "?client_id="
-                    + getString(R.string
-                    .soundcloud_client_id));
-            adioList.add(audio);
-        }
-        return adioList;
-    }
 
     private void playAudio(int audioIndex) {
         //Check is service is active
@@ -134,12 +112,12 @@ public class MainActivity extends PlayerActivity {
     }
 
     @Override
-    public boolean isPlaying(){
+    public boolean isPlaying() {
         return presenter.isMediaPlaying();
     }
 
     @Override
-    public void  seek(int pos){
+    public void seek(int pos) {
         presenter.seek(pos);
     }
 

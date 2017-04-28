@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 
 import com.quintype.musicstreaming.interactor.MainInteractor;
 import com.quintype.musicstreaming.notificationmanager.MainPresenter;
+import com.quintype.musicstreaming.utils.StorageUtil;
 
 /**
  * Created by akshaykoul on 16/04/17.
@@ -22,7 +23,7 @@ public abstract class PlayerActivity extends MusicFragmentActivity implements UI
         super.onCreate(savedInstanceState);
         mainInteractor = new MainInteractor(getApplication(), PreferenceManager
                 .getDefaultSharedPreferences(getApplication()), (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE));
+                getSystemService(Context.CONNECTIVITY_SERVICE),new StorageUtil(getApplicationContext()));
         presenter = new MainPresenter(this, mainInteractor);
     }
     @Override

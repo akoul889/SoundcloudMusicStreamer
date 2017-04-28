@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.TrackHolder;
+import com.quintype.musicstreaming.models.NowPlaying;
 import com.quintype.musicstreaming.models.Track;
 import com.quintype.musicstreaming.ui.fragments.FragmentCallbacks;
 import com.quintype.musicstreaming.utils.Constants;
+import com.quintype.musicstreaming.utils.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +40,14 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof TrackHolder) {
             ((TrackHolder) holder).bind(tracks.get(position));
+            final String clientId = holder.itemView.getContext().getString(R.string
+                    .soundcloud_client_id);
             ((TrackHolder) holder).itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     fragmentCallbacks.propagateEvent(new Pair<String, Object>(Constants
-                            .EVENT_TRACK_CLICK, position));
+                            .EVENT_TRACK_CLICK, new NowPlaying(Utilities.getAudioFromTracks
+                            (tracks, clientId), position)));
                 }
             });
         }
@@ -58,5 +63,10 @@ public class TrackAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         tracks.addAll(newTracks);
         int end = tracks.size();
         notifyItemRangeInserted(start, end);
+    }
+
+    public void clearAll() {
+        tracks.clear();
+        notifyDataSetChanged();
     }
 }
