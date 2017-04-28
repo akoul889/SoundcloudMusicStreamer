@@ -21,12 +21,12 @@ import com.quintype.musicstreaming.models.Track;
 import com.quintype.musicstreaming.utils.Constants;
 
 import java.util.List;
+import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
-
 
 public class SoundcloudListFragment extends Fragment {
 
@@ -73,16 +73,30 @@ public class SoundcloudListFragment extends Fragment {
         llMainContainer = (FrameLayout) view.findViewById(R.id
                 .fragment_soundcloud_ll_main_container);
         progressBar = (ProgressBar) view.findViewById(R.id.pb_tag_fragment);
-
+        swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
         trackAdapter = new TrackAdapter(callbacks);
         rvRecyclerView.setAdapter(trackAdapter);
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                trackAdapter.clearAll();
+                loadTracks();
+            }
+        });
+        loadTracks();
+        return view;
+    }
 
-
+    private void loadTracks() {
+        String[] querylist = getResources().getStringArray(R.array.soundcloud_random_query);
+        Random random = new Random();
+        int pos = random.nextInt(querylist.length);
         Timber.d("Making the Call");
-        SoundCloudApiClient.getApiService().searchTracks("shape of you", getString(R.string
+        SoundCloudApiClient.getApiService().searchTracks(querylist[pos], getString(R.string
                 .soundcloud_client_id)).enqueue(new Callback<List<Track>>() {
             @Override
             public void onResponse(Call<List<Track>> call, Response<List<Track>> response) {
+                swipeContainer.setRefreshing(false);
                 if (response.isSuccessful()) {
                     trackAdapter.addTracks(response.body());
                     progressBar.setVisibility(View.GONE);
@@ -95,11 +109,10 @@ public class SoundcloudListFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<Track>> call, Throwable t) {
-
+                swipeContainer.setRefreshing(false);
                 Timber.d("Call failure");
             }
         });
-        return view;
     }
 
 //    public void onButtonPressed(Uri uri) {

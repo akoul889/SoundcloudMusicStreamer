@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="soundcloud_random_query">
+        <item>shape of you</item>
+        <item>secret agent man</item>
+        <item>Queen</item>
+        <item>Adele</item>
+        <item>Serenity</item>
+        <item>Enrique</item>
+        <item>One Day</item>
+    </string-array>
+</resources>
