@@ -1,31 +1,26 @@
 package com.quintype.musicstreaming.ui.activities;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
-import com.quintype.musicstreaming.interactor.MainInteractor;
+import com.quintype.musicstreaming.MusicStreamApplication;
 import com.quintype.musicstreaming.notificationmanager.MainPresenter;
-import com.quintype.musicstreaming.utils.StorageUtil;
 
 /**
  * Created by akshaykoul on 16/04/17.
  */
 
-public abstract class PlayerActivity extends MusicFragmentActivity implements UIinteractor{
+public abstract class PlayerActivity extends MusicFragmentActivity implements UIinteractor {
 
-    protected MainInteractor mainInteractor;
     MainPresenter presenter;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mainInteractor = new MainInteractor(getApplication(), PreferenceManager
-                .getDefaultSharedPreferences(getApplication()), (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE),new StorageUtil(getApplicationContext()));
-        presenter = new MainPresenter(this, mainInteractor);
+        presenter = ((MusicStreamApplication) getApplication()).getPresenter();
+        presenter.addInteractor(this);
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -36,5 +31,11 @@ public abstract class PlayerActivity extends MusicFragmentActivity implements UI
     protected void onStop() {
         super.onStop();
         presenter.unBindService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        presenter.removeInteractor(this);
+        super.onDestroy();
     }
 }

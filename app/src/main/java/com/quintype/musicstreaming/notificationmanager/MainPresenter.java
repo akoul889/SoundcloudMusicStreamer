@@ -13,12 +13,11 @@ import java.util.List;
  */
 public class MainPresenter implements OnStreamServiceListener {
 
-    private UIinteractor view;
+    private List<UIinteractor> uIinteractors = new ArrayList<>();
     private MainInteractor interactor;
 
-    public MainPresenter(UIinteractor view, MainInteractor interactor) {
+    public MainPresenter(MainInteractor interactor) {
 
-        this.view = view;
         this.interactor = interactor;
     }
 
@@ -69,45 +68,64 @@ public class MainPresenter implements OnStreamServiceListener {
 
     public void streamStopped() {
 
-        view.setToStopped();
+        for (UIinteractor view : uIinteractors) {
+
+            view.setToStopped();
+        }
     }
 
     @Override
     public void updateTimerValue(String timeLeft) {
 
-        view.updateTimer(timeLeft);
+        for (UIinteractor view : uIinteractors) {
+
+            view.updateTimer(timeLeft);
+        }
     }
 
     public void restoreUI(Audio stream, boolean isPlaying) {
 
-        view.initializeUI(stream, isPlaying);
+        for (UIinteractor view : uIinteractors) {
+
+            view.initializeUI(stream, isPlaying);
+        }
     }
 
     public void setLoading() {
+        for (UIinteractor view : uIinteractors) {
 
-        view.setLoading();
+            view.setLoading();
+        }
     }
 
     public void streamPlaying() {
+        for (UIinteractor view : uIinteractors) {
 
-        view.setToPlaying();
+            view.setToPlaying();
+        }
     }
 
     public void animateTo(Audio currentStream) {
+        for (UIinteractor view : uIinteractors) {
 
-        view.animateTo(currentStream);
+            view.animateTo(currentStream);
+        }
     }
 
     @Override
     public void error(String error) {
+        for (UIinteractor view : uIinteractors) {
 
-        view.error(error);
+            view.error(error);
+        }
     }
 
     @Override
     public void showAllStreams(List<Audio> streams) {
+        for (UIinteractor view : uIinteractors) {
 
-        view.showStreamsDialog(streams);
+            view.showStreamsDialog(streams);
+        }
     }
 
     public void updatePlaylist(ArrayList<Audio> streams, StorageUtil storage) {
@@ -132,4 +150,13 @@ public class MainPresenter implements OnStreamServiceListener {
     public void seek(int pos) {
         interactor.seek(pos);
     }
+
+    public void addInteractor(UIinteractor view) {
+        uIinteractors.add(view);
+    }
+
+    public void removeInteractor(UIinteractor view) {
+        uIinteractors.remove(view);
+    }
+
 }
