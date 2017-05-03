@@ -26,8 +26,10 @@ import android.util.Log;
 
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.models.Audio;
+import com.quintype.musicstreaming.utils.StorageUtil;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
@@ -36,7 +38,7 @@ import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
 import static android.media.AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
 
 /**
- * @author Niels Masdorp (NielsMasdorp)
+ * @author Akshay Koul (akoul889)
  */
 public class StreamService extends Service implements
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
@@ -78,10 +80,14 @@ public class StreamService extends Service implements
     private final IBinder streamBinder = new StreamBinder();
     private MediaPlayer player;
     private Audio currentStream;
+    List<Audio> nowPlayingList;
+    int nowPlayingPosition = 0;
     private LocalBroadcastManager broadcastManager;
     private CountDownTimer countDownTimer;
 
     private static final int STOP_DELAY = 30000;
+
+    private StorageUtil storageUtil;
 
     public void onCreate() {
         super.onCreate();
@@ -90,6 +96,8 @@ public class StreamService extends Service implements
         } catch (RemoteException e) {
             Timber.e("RemoteException", e);
         }
+
+        storageUtil = new StorageUtil(getApplicationContext());
         player = new MediaPlayer();
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(this);
@@ -194,6 +202,10 @@ public class StreamService extends Service implements
             notificationAction = android.R.drawable.ic_media_play;
             //create the play action
             play_pauseAction = playbackAction(0);
+        } else if (state == State.PREPARING) {
+            notificationAction = android.R.drawable.ic_media_pause;
+            //create the pause action by default
+            play_pauseAction = playbackAction(1);
         }
         Intent closeIntent = new Intent(getApplicationContext(), StreamService.class);
         closeIntent.setAction(ACTION_STOP);
@@ -273,12 +285,13 @@ public class StreamService extends Service implements
     /**
      * Start play a stream
      */
-    public void playStream(Audio stream) {
+    public void playStream() {
 
         int status = mAudioManager.requestAudioFocus(mAudioFocusListener,
                 AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
-
-
+        nowPlayingList = storageUtil.loadAudio();
+        nowPlayingPosition = storageUtil.loadAudioIndex();
+        Audio stream = nowPlayingList.get(nowPlayingPosition);
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         if (status != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return;
@@ -557,7 +570,6 @@ public class StreamService extends Service implements
                 Timber.d("onPause");
                 super.onPause();
                 pauseStream();
-//                buildNotification(PlaybackStatus.PAUSED);
                 toForeground();
                 toBackground(false);
             }
@@ -566,18 +578,35 @@ public class StreamService extends Service implements
             public void onSkipToNext() {
                 Timber.d("onSkipToNext");
                 super.onSkipToNext();
-//                skipToNext();
-//                updateMetaData();
-//                buildNotification(PlaybackStatus.PLAYING);
+                if (nowPlayingPosition != (nowPlayingList.size() - 1)) {
+                    updateCurrentlyPlaying(nowPlayingPosition + 1);
+                } else {
+                    updateCurrentlyPlaying(0);
+                }
+
+                if (state == StreamService.State.PLAYING || state
+                        == StreamService.State.PAUSED) {
+                    stopStreaming();
+                    playStream();
+                    toForeground();
+                }
             }
 
             @Override
             public void onSkipToPrevious() {
                 Timber.d("onSkipToPrevious");
                 super.onSkipToPrevious();
-//                skipToPrevious();
-//                updateMetaData();
-//                buildNotification(PlaybackStatus.PLAYING);
+                if (nowPlayingPosition != 0) {
+                    updateCurrentlyPlaying(nowPlayingPosition - 1);
+                } else {
+                    updateCurrentlyPlaying(nowPlayingList.size() - 1);
+                }
+
+                if (state == StreamService.State.PLAYING || state == StreamService.State.PAUSED) {
+                    stopStreaming();
+                    playStream();
+                    toForeground();
+                }
             }
 
             @Override
@@ -585,13 +614,6 @@ public class StreamService extends Service implements
                 Timber.d("onStop");
                 super.onStop();
 
-                //TODO check when this get triggered
-                /*stopself will destroy the service which in turn will remove the notification so
-                 I don't see the point of removeNotification()
-                  */
-//                removeNotification();
-                //Stop the service
-//                stopSelf();
             }
 
             @Override
@@ -664,5 +686,10 @@ public class StreamService extends Service implements
                 service.stopSelf();
             }
         }
+    }
+
+    private void updateCurrentlyPlaying(int pos) {
+        nowPlayingPosition = pos;
+        storageUtil.storeAudioIndex(pos);
     }
 }

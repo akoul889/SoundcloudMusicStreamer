@@ -40,9 +40,10 @@ public class MainInteractor {
     private OnStreamServiceListener presenter;
 
     private Boolean boundToService = false;
+    private StorageUtil storage;
 
     private List<Audio> streams;
-    private Audio currentStream;
+//    private Audio currentStream;
     private int currentlyPlaying = 0;
 
     public MainInteractor(Application application, SharedPreferences preferences,
@@ -51,12 +52,11 @@ public class MainInteractor {
         this.application = application;
         this.preferences = preferences;
         this.connectivityManager = connectivityManager;
-
-
+        this.storage = storage;
         streams = storage.loadAudio();
         if (streams != null) {
             currentlyPlaying = storage.loadAudioIndex();
-            currentStream = streams.get(currentlyPlaying);
+//            currentStream = streams.get(currentlyPlaying);
         } else {
             streams = new ArrayList<>();
         }
@@ -99,8 +99,9 @@ public class MainInteractor {
         }
         LocalBroadcastManager.getInstance(application).unregisterReceiver(broadcastReceiver);
 
-        preferences.edit().putInt(LAST_STREAM_IDENTIFIER, currentStream != null ?
-                currentlyPlaying : 0).apply();
+//        preferences.edit().putInt(LAST_STREAM_IDENTIFIER, currentStream != null ?
+//                currentlyPlaying : 0).apply();
+        storage.storeAudioIndex(currentlyPlaying);
     }
 
     public void playStream() {
@@ -110,7 +111,8 @@ public class MainInteractor {
         switch (streamService.getState()) {
             case STOPPED:
                 if (connectedToWifi || !isStreamWifiOnly()) {
-                    streamService.playStream(currentStream);
+//                    streamService.playStream(currentStream);
+                    streamService.playStream();
                     presenter.setLoading();
                     if (!connectedToWifi) {
                         presenter.error(application.getString(R.string.no_wifi_toast));
@@ -169,9 +171,8 @@ public class MainInteractor {
 
     public void previousStream() {
 
-        int currentStreamId = currentStream.getId();
-        if (currentStreamId != 0) {
-            updateCurrentlyPlaying(currentStreamId - 1);
+        if (currentlyPlaying != 0) {
+            updateCurrentlyPlaying(currentlyPlaying - 1);
         } else {
             updateCurrentlyPlaying(streams.size() - 1);
         }
@@ -324,13 +325,13 @@ public class MainInteractor {
             Log.i(TAG, "onServiceConnected: successfully bound to service.");
             StreamService.StreamBinder binder = (StreamService.StreamBinder) service;
             streamService = binder.getService();
-            currentStream = streamService.getPlayingStream();
+            Audio currentStream = streamService.getPlayingStream();
             if (currentStream != null) {
                 presenter.restoreUI(currentStream, streamService.getState() == StreamService
                         .State.PLAYING);
             } else if (!streams.isEmpty()) {
                 if (!streams.isEmpty()) {
-                    int last = preferences.getInt(LAST_STREAM_IDENTIFIER, 0);
+                    int last = storage.loadAudioIndex();
                     currentStream = streams.get(last);
                     presenter.restoreUI(currentStream, false);
                 }
@@ -354,18 +355,23 @@ public class MainInteractor {
 
 
     public void updatePlaylist(List<Audio> playlist) {
+        int currentStreamId = 0;
+        if (!streams.isEmpty()) {
+            currentStreamId = streams.get(currentlyPlaying).getId();
+        }
         streams.clear();
         streams.addAll(playlist);
-        if (currentStream != null) {
+        if (currentStreamId != 0) {
             for (int i = 0; i < streams.size(); i++) {
                 Audio stream = streams.get(i);
-                if (currentStream.getId() == stream.getId()) {
+                if (currentStreamId == stream.getId()) {
                     currentlyPlaying = i;
                     break;
                 }
 
             }
         }
+        storage.storeAudio((ArrayList<Audio>) playlist);
         updateCurrentlyPlaying(currentlyPlaying);
     }
 
@@ -373,13 +379,12 @@ public class MainInteractor {
         if (!streams.isEmpty()) {
             if ((streams.size() > pos)) {
                 currentlyPlaying = pos;
-                currentStream = streams.get(currentlyPlaying);
 
             } else {
                 currentlyPlaying = 0;
-                currentStream = streams.get(currentlyPlaying);
             }
-            presenter.restoreUI(currentStream, false);
+            storage.storeAudioIndex(currentlyPlaying);
+            presenter.restoreUI(streams.get(currentlyPlaying), false);
         }
     }
 
