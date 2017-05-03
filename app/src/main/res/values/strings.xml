@@ -24,4 +24,5 @@
 
     <string name="stream_notification_image_content_desc">Notification stream image</string>
     <string name="notification_cancel_button_content_desc">Cancel notification button</string>
+    <string name="title_activity_now_playing">NowPlayingActivity</string>
 </resources>
