@@ -1,5 +1,6 @@
 package com.quintype.musicstreaming.ui.activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -82,30 +83,6 @@ public class MainActivity extends PlayerActivity {
         }
     }
 
-
-    private void playAudio(int audioIndex) {
-        //Check is service is active
-//        if (!serviceBound) {
-//            //Store Serializable audioList to SharedPreferences
-//            StorageUtil storage = new StorageUtil(getApplicationContext());
-//            storage.storeAudio(playList);
-//            storage.storeAudioIndex(audioIndex);
-//
-//            Intent playerIntent = new Intent(this, MediaService.class);
-//            startService(playerIntent);
-//            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-//        } else {
-//            //Store the new audioIndex to SharedPreferences
-//            StorageUtil storage = new StorageUtil(getApplicationContext());
-//            storage.storeAudioIndex(audioIndex);
-//
-//            //Service is active
-//            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-//            Intent broadcastIntent = new Intent(Constants.Broadcast_PLAY_NEW_AUDIO);
-//            sendBroadcast(broadcastIntent);
-//        }
-    }
-
     @Override
     public int getCurrentTrackPosition() {
         return presenter.getCurrentMediaPosition();
@@ -134,12 +111,13 @@ public class MainActivity extends PlayerActivity {
 
         @Override
         protected void onPostExecute(String result) {
-//            QuickControlsFragment.topContainer.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
+            QuickControlsFragment.topContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 //                    NavigationUtils.navigateToNowplaying(BaseActivity.this, false);
-//                }
-//            });
+                    startActivity(new Intent(MainActivity.this, NowPlayingActivity.class));
+                }
+            });
         }
 
         @Override

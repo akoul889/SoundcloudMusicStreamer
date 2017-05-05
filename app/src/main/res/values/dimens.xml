@@ -5,4 +5,6 @@
     <dimen name="playback_controls_albumart_horizontal_margin">8dp</dimen>
     <dimen name="playback_controls_albumart_size">64dp</dimen>
     <dimen name="playback_controls_padding">8dp</dimen>
+
+    <dimen name="music_player_height">372dp</dimen>
 </resources>
