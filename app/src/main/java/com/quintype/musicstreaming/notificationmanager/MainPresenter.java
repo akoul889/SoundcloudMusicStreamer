@@ -155,6 +155,9 @@ public class MainPresenter implements OnStreamServiceListener {
         uIinteractors.add(view);
     }
 
+    public int getInteractorCount(){
+        return uIinteractors.size();
+    }
     public void removeInteractor(UIinteractor view) {
         uIinteractors.remove(view);
     }

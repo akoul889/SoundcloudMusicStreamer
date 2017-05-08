@@ -30,7 +30,9 @@ public abstract class PlayerActivity extends MusicFragmentActivity implements UI
     @Override
     protected void onStop() {
         super.onStop();
-        presenter.unBindService();
+        if (presenter.getInteractorCount() == 1) {
+            presenter.unBindService();
+        }
     }
 
     @Override
