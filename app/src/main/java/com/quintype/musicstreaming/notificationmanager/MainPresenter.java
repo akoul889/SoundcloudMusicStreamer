@@ -133,8 +133,24 @@ public class MainPresenter implements OnStreamServiceListener {
         interactor.updatePlaylist(streams);
     }
 
+    /**
+     * To play a new list of tracks (Updates the now playing list)
+     * @param streams new list of tracks to be played
+     * @param audioIndex Position of the intended song to be played
+     * @param storage Storage Utils to store the preferences locally
+     */
     public void playNewTrack(ArrayList<Audio> streams, int audioIndex, StorageUtil storage) {
         updatePlaylist(streams, storage);
+        storage.storeAudioIndex(audioIndex);
+        interactor.playNewStream(audioIndex);
+    }
+
+    /**
+     * To play a new track in the same list as the now playing songs
+     * @param audioIndex Position of the intended song to be played
+     * @param storage Storage Utils to store the preferences locally
+     */
+    public void playNewTrack( int audioIndex, StorageUtil storage) {
         storage.storeAudioIndex(audioIndex);
         interactor.playNewStream(audioIndex);
     }

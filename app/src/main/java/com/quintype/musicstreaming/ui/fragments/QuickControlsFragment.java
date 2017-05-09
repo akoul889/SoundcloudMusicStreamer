@@ -57,7 +57,15 @@ public class QuickControlsFragment extends Fragment {
     private SeekBar mSeekBar;
 
     Handler seekbarHandler = new Handler();
-    public Runnable mUpdateProgress = new Runnable() {
+
+    public class UpdateProgress implements Runnable {
+
+        int maxDuration = 0;
+
+        public UpdateProgress(int maxDuration) {
+            this.maxDuration = maxDuration;
+        }
+
 
         @Override
         public void run() {
@@ -67,13 +75,15 @@ public class QuickControlsFragment extends Fragment {
                 mProgress.setProgress((int) position);
                 mSeekBar.setProgress((int) position);
 
-                if (callbacks.isPlaying()) {
-                    mProgress.postDelayed(mUpdateProgress, 50);
+                if (position <= maxDuration) {
+                    mProgress.postDelayed(this, 50);
                 } else mProgress.removeCallbacks(this);
             }
 
         }
-    };
+    }
+
+    ;
     private PlayPauseButton mPlayPause, mPlayPauseExpanded;
     private TextView mTitle, mTitleExpanded;
     private TextView mArtist, mArtistExpanded;
@@ -82,11 +92,11 @@ public class QuickControlsFragment extends Fragment {
     private View playPauseWrapper, playPauseWrapperExpanded;
     private MaterialIconView previous, next;
     private ProgressBar streamProgress, streamProgressExpanded;
-    private boolean duetoplaypause = false;
+    private boolean duetoPlayPause = false;
     private final View.OnClickListener mPlayPauseListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            duetoplaypause = true;
+            duetoPlayPause = true;
             if (!mPlayPause.isPlayed()) {
                 mPlayPause.setPlayed(true);
                 mPlayPause.startAnimation();
@@ -109,7 +119,7 @@ public class QuickControlsFragment extends Fragment {
     private final View.OnClickListener mPlayPauseExpandedListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            duetoplaypause = true;
+            duetoPlayPause = true;
             if (!mPlayPauseExpanded.isPlayed()) {
                 mPlayPauseExpanded.setPlayed(true);
                 mPlayPauseExpanded.startAnimation();
@@ -243,7 +253,7 @@ public class QuickControlsFragment extends Fragment {
         mArtist.setText(stream.getArtist());
         mTitleExpanded.setText(stream.getTitle());
         mArtistExpanded.setText(stream.getArtist());
-        if (!duetoplaypause) {
+        if (!duetoPlayPause) {
             Glide.with(this).load(stream.getArtwork()).into(new GlideDrawableImageViewTarget
                     (mAlbumArt) {
                 @Override
@@ -267,10 +277,10 @@ public class QuickControlsFragment extends Fragment {
 //                    R.drawable.ic_empty_music2);
 //            new setBlurredAlbumArt().execute(icon);
         }
-        duetoplaypause = false;
+        duetoPlayPause = false;
         mProgress.setMax((int) stream.getDuration());
         mSeekBar.setMax((int) stream.getDuration());
-        seekbarHandler.postDelayed(mUpdateProgress, 500);
+        seekbarHandler.postDelayed(new UpdateProgress(stream.getDuration()), 500);
     }
 
     @Override

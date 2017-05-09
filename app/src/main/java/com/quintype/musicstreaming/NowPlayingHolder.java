@@ -36,7 +36,8 @@ public class NowPlayingHolder extends RecyclerView.ViewHolder {
     public void bind(Audio audio) {
         trackTitle.setText(audio.getTitle());
         trackArtist.setText(audio.getArtist());
-        glideRequestManager.load(audio.getArtwork()).into(thumbnail);
+        glideRequestManager.load(audio.getArtwork()).error(R.drawable.ic_empty_music2).into
+                (thumbnail);
     }
 
 }

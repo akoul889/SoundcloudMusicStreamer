@@ -17,8 +17,11 @@ import com.bumptech.glide.Glide;
 import com.quintype.musicstreaming.R;
 import com.quintype.musicstreaming.adapter.NowPlayingAdapter;
 import com.quintype.musicstreaming.models.Audio;
+import com.quintype.musicstreaming.utils.RecyclerItemClickListener;
 import com.quintype.musicstreaming.utils.StorageUtil;
 import com.quintype.musicstreaming.widgets.PlayPauseButton;
+
+import net.steamcrafted.materialiconlib.MaterialIconView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,40 +36,137 @@ public class NowPlayingActivity extends PlayerActivity {
     ImageView currentSongThumbnail;
     StorageUtil storageUtil;
     ProgressBar streamProgress;
+    View playPauseWrapper;
     NowPlayingAdapter nowPlayingAdapter;
     PlayPauseButton mPlayPause;
     private SeekBar mSeekBar;
+    private boolean duetoPlayPause = false;
+    private MaterialIconView previous, next;
+
+    ArrayList<Audio> nowPlaying;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_now_playing);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         storageUtil = new StorageUtil(getApplicationContext());
-        ArrayList<Audio> nowPlaying = storageUtil.loadAudio();
+        nowPlaying = storageUtil.loadAudio();
         int currentlyPlaying = storageUtil.loadAudioIndex();
 
         nowPlayingRecyclerView = (RecyclerView) findViewById(R.id.now_playing_list);
+        playPauseWrapper = findViewById(R.id.playpausewrapper);
         currentSongTitle = (TextView) findViewById(R.id.song_title);
         currentSongArtist = (TextView) findViewById(R.id.song_artist);
         mPlayPause = (PlayPauseButton) findViewById(R.id.playpause);
         currentSongThumbnail = (ImageView) findViewById(R.id.song_thumbnail);
         streamProgress = (ProgressBar) findViewById(R.id.pb_playback_control);
+        next = (MaterialIconView) findViewById(R.id.next);
+        previous = (MaterialIconView) findViewById(R.id.previous);
+        next.setOnClickListener(nextClickListener);
+        previous.setOnClickListener(previousClickListener);
         mSeekBar = (SeekBar) findViewById(R.id.song_progress);
         nowPlayingAdapter = new NowPlayingAdapter(nowPlaying);
         nowPlayingRecyclerView.setAdapter(nowPlayingAdapter);
+        playPauseWrapper.setOnClickListener(mPlayPauseListener);
+        nowPlayingRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener
+                (NowPlayingActivity.this, nowPlayingRecyclerView, new RecyclerItemClickListener
+                        .OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        presenter.playNewTrack(position, storageUtil);
+                    }
+
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        Toast.makeText(mContext, "Long Clicked " + nowPlaying.get(position)
+                                .getTitle(), Toast.LENGTH_SHORT).show();
+                    }
+                }));
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (b) {
+                    presenter.seek(i);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
         initializeNowPlaying(nowPlaying.get(currentlyPlaying));
     }
+
+
+    private final View.OnClickListener mPlayPauseListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            duetoPlayPause = true;
+            if (!mPlayPause.isPlayed()) {
+                mPlayPause.setPlayed(true);
+                mPlayPause.startAnimation();
+            } else {
+                mPlayPause.setPlayed(false);
+                mPlayPause.startAnimation();
+            }
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    presenter.playStream();
+                }
+            }, 200);
+
+        }
+    };
+    private final View.OnClickListener nextClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    presenter.nextStream();
+                }
+            }, 200);
+
+        }
+    };
+
+    private final View.OnClickListener previousClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    presenter.previousStream();
+                }
+            }, 200);
+
+        }
+    };
+
 
     private void initializeNowPlaying(Audio audio) {
 
         currentSongTitle.setText(audio.getTitle());
         currentSongTitle.setSelected(true);
         currentSongArtist.setText(audio.getArtist());
-        Glide.with(this).load(audio.getArtwork()).into(currentSongThumbnail);
+        if (!duetoPlayPause) {
+            Glide.with(this).load(audio.getArtwork()).error(R.drawable.ic_empty_music2).into
+                    (currentSongThumbnail);
+        }
+        duetoPlayPause = false;
         mSeekBar.setMax((int) audio.getDuration());
         mSeekBar.setProgress(getCurrentTrackPosition());
         seekbarHandler.postDelayed(new UpdateProgress(audio.getDuration()), 500);
@@ -90,7 +190,7 @@ public class NowPlayingActivity extends PlayerActivity {
             Timber.d("New position %d", position);
             mSeekBar.setProgress((int) position);
 
-            if (isPlaying() && position <= maxDuration) {
+            if (position <= maxDuration) {
                 mSeekBar.postDelayed(this, 50);
             } else mSeekBar.removeCallbacks(this);
 
